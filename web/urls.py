@@ -1,8 +1,11 @@
-from django.urls import path,include
+from django.urls import path,include,re_path
 from django.contrib.auth.views import LoginView
 from .views import log_the_request
 from . import views
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import RedirectView
+
+favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
 # indus is account management prefix
 urlpatterns = [
@@ -24,5 +27,6 @@ urlpatterns = [
     path('bookmark',views.bookmark,name='bookmark'),
     path('follow/<int:next>',views.follow,name='follow'),
     path('search',views.search_letters,name="search_explore"),
-    path('tour',views.tour,name='tour')
+    path('tour',views.tour,name='tour'),
+    re_path(r'^favicon\.ico$', favicon_view),
 ]
