@@ -7,6 +7,7 @@ Django==3.0.8
 django-extensions==3.0.4
 idna==2.10
 IMAPClient==2.1.0
+python-dotenv==0.14.0
 pytz==2019.3
 requests==2.24.0
 requests-file==1.5.1
