@@ -1,0 +1,65 @@
+
+{% block navbar %}
+
+            <nav class="navbar navbar-expand-md navbar-light bg-light">
+                <div class="container-fluid">
+                    {% if request.user.is_authenticated %}
+                        <a class="navbar-brand h3 col-2 mr-0" href="{% url 'feed' %}">
+                            { Kleeppr }
+                        </a>
+                    {% else %}
+                         <a class="navbar-brand h3 col-2 mr-0" href="{% url 'index' %}">
+                            { Kleeppr }
+                        </a>
+                    {% endif %}
+
+                    {% if request.user.is_authenticated %}
+
+                        <!-- note data-target pointing to collapse-div -->
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#klpMenu"
+                                aria-controls="klpMenu" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <!-- put everything that goes inside hamberger menu inside "collapse navbar-collapse" class -->
+                        <div class="collapse navbar-collapse pl-2" id="klpMenu">
+
+                            <ul class="navbar-nav">
+                                <!-- nav-link text below is right justified in style.css for hanmberger menu -->
+
+                                    <a class="nav-link {% if request.path == 'feed' %} active {% endif %} " href="{% url 'feed' %}">Feed</a>
+                                    <a class="nav-link {% if request.path == 'mysub' %} active {% endif %} " href="{% url 'mysub' %}">Subscriptions</a>
+                                    <a class="nav-link {% if request.path == 'confirmsub' %} active {% endif %} " href="{% url 'confirmsub' %}">Pending Confirmations</a>
+                                    <a class="nav-link {% if request.path == 'explore' %} active {% endif %}" href="{% url 'explore' %}">Explore</a>
+
+                                {% comment %}
+                                    <a class="nav-link {%- if request.path == '/mailbox/confirm' %} active {% endif %} " href="{{ url_for('mailbox.confirm_sub') }}">Pending Confirmations</a>
+                                    <a class="nav-link {%- if request.path == '/explore' %} active {% endif %}" href="{{ url_for('website.explore') }}">Explore</a>
+                                {% endcomment %}
+                            </ul>
+
+                            <ul class="navbar-nav ml-md-auto pl-5">
+                                 <a class="nav-link" href="{% url 'tour' %}">Tour</a>
+                                {% if request.session.pseudo_email %}
+                                    <a tabindex="0" class="nav-link" role="button" data-toggle="popover" data-placement="bottom"
+                                       data-trigger="focus" title="Your Kleeppr Email"
+                                       data-content="u+{{ request.session.pseudo_email }}@kleeppr.com">
+                                        Email
+                                    </a>
+                                    <a class="nav-link" href="/bookmark">Bookmarklet</a>
+                                {% endif %}
+                                <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>
+                            </ul>
+
+                        {% else %}
+                             <!-- ml-lg-auto: margin left set to auto for large screen thats shifts to this item to right -->
+                             <ul class="navbar-nav ml-md-auto pl-5">
+                                 <a class="nav-link active" href="mailto:hello@kleeppr.com">hello@kleeppr.com</a>
+                            </ul>
+                            {% endif %}
+
+                    </div>
+                </div>
+            </nav>
+
+ {% endblock %}

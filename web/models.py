@@ -1,0 +1,83 @@
+from django.db import models
+from django.contrib.auth.models import User
+from datetime import datetime
+
+
+class Tags(models.Model):
+    tag = models.TextField(unique=True,default="")
+
+    def __str__(self):
+        return str(self.tag)
+
+
+class Newsletters(models.Model):
+
+    letter = models.TextField(null=True)
+    sender_email = models.TextField(null=True)
+    url = models.TextField(null=True)
+    desc = models.TextField(null=True)
+    author = models.TextField(null=True)
+    author_url = models.TextField(null=True)
+    frequency = models.TextField(choices=[("D","daily"),("W","weekly")],null=True)
+    tags = models.ManyToManyField(Tags)
+    extra_info = models.TextField(null=True,default="")
+
+    created_at = models.DateTimeField(auto_now_add=True,null=True)
+    updated_at = models.DateTimeField(auto_now=True,null=True)
+
+    def get_tags(self):
+        tags = self.tags.all().values_list('tag',flat=True)
+        if tags:
+            return " ".join(tags)
+        else:
+            return "uncategorized"
+
+    def get_frequency(self):
+        a = {"D":"daily","W":"weekly"}
+        key = str(self.frequency)
+        if key in a:
+            return a[key]
+        else:
+            return "NA"
+
+    def is_complete(self):
+        for f in [self.letter, self.tags, self.frequency, self.url, self.sender_email, self.author, self.desc ]:
+            if f is None or f == "" or f == "unknown" or f == "NA":
+                return False
+
+        return True
+
+    def __str__(self):
+        return self.letter
+
+
+class Feed(models.Model):
+
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    message_id = models.TextField(null=True)
+    ts = models.DateTimeField(default=datetime.now())
+    nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
+    history_id = models.TextField(null=True)
+    is_confirmation = models.BooleanField(default=False)
+
+
+class UserSettings(models.Model):
+
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField(null=True)
+    pseudo_email = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class UserSubs(models.Model):
+
+    user_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
+    unsub_url = models.TextField(null=True)
+    feed_count = models.IntegerField(default=0)
+
+    def has_confirmation_email(self):
+         f = Feed.objects.filter(user_id=self.user_id).filter(nwl_id=self.nwl_id).\
+            filter(is_confirmation=True)
+         return f.exists() and self.feed_count > 0

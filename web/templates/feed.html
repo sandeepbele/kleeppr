@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% include 'navbar.html' %}
+
+{% block page_content %}
+
+    <div class="container-fluid">
+        <div class="row">
+
+                <div class="col-md-2 mt-3">
+                {%  if nwl %}
+                 <div class="card text-center">
+                                <!---img class="card-img-top" data-src="holder.js/100x180/" alt="Card image cap"-->
+                                <div class="card-header ">
+                                    <h4> {{ nwl.letter }} </h4>
+                                    <h6 class="text-muted"> By {{ nwl.author }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ nwl.desc }} </p>
+                                </div>
+                                <div class="container mb-1">
+                                    <p class="card-text small text-muted">{{ nwl.tags }} {{ nwl.frequency }}</p>
+                                </div>
+                                <div class="card-footer text-center">
+                                    <a href="{{ nwl.url }}" target="_blank" class="btn btn-secondary stretched-link">View Webpage</a>
+                                </div>
+                    </div>
+                     {% endif %}
+                </div>
+
+            <div class="col col-md-10">
+            <!--div class="col pl-6 ml-sm-5 mr-sm-5"-->
+            <!--div class="col col-md-10 offset-md-1"-->
+            {% if not mails %}
+                 <div class="alert alert-warning fade show mt-3" role="alert">
+                   You have no active subscriptions. Please <a href="{% url 'explore' %}">explore</a> interesting newsletters and subscribe to start receiving them in your feed.
+                 </div>
+
+            {% else %}
+
+                <div class="card border-0">
+                    <div class="card-body pb-1 mx-4">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'feed' %}">
+                                    <button type="button" class="btn btn-sm btn-dark">Refresh</button>
+                                </a>
+                            </div>
+
+                            <div class="nav">
+                                 <ul class="pagination pagination-sm">
+                                     <li class="page-item text-center small text-muted m-2">
+
+                                             {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+                                     </li>
+                                    {% if page_obj.has_previous %}
+                                     <li class="page-item">
+                                        <a class="page-link" href="?page=1">&laquo; first</a>
+                                     </li>
+                                     <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                                     </li>
+                                    {% endif %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    {% for mail in mails %}
+                    <li class="list-group-item">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <a href="{% url 'letter' message_id=mail.message_id %}">
+                                    <h5 class="card-title"> {{ mail.subject | safe }}</h5>
+                                </a>
+                                <h6 class="card-subtitle text-muted">by {{ mail.from }}</h6>
+                                <p class="card-text mt-2">{{ mail.snippet |safe }}...</p>
+
+                                <div class="card-text">
+                                    <small>{{ mail.x_time_ago }}</small>
+                                </div>
+                                <!--div class="card-text">
+                                    <small>{{ mail.tags }}</small>
+                                </div-->
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% include 'navbar.html' %}
+
+{% block custom_js_inhead %}
+
+  <!-- https://stackoverflow.com/questions/9975810/make-iframe-automatically-adjust-height-according-to-the-contents-without-using -->
+  <script>
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+  }
+</script>
+
+{% endblock %}
+
+
+
+{% block page_content %}
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col ml-sm-5 mr-sm-5" >
+
+                <ul class="list-group list-group-flush mt-2">
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-sm btn-dark" onclick="javascript:history.back()">Back</button>
+                    </li>
+                    <li class="list-group-item text-center">
+                        <div class="small"> {{ ts }} | by {{ author }} </div>
+                        <div class="pt-2">{{ title }}</div>
+                    </li>
+                </ul>
+
+                <div class="container-fluid mt-3 mb-3">
+
+                    <iframe id="letter"
+                title="letter content"
+                style="overflow:hidden;
+         display:block; position: relative; height: 100vh; width: 100%; border:none"
+                src="{% url 'letter_content' message_id=message_id %}" onload="resizeIframe(this)" scrolling="no">
+            </iframe>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

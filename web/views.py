@@ -1,0 +1,342 @@
+from django.db.models import Q
+from django.shortcuts import render, redirect, reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import LoginView
+# Create your views here
+from django.http import HttpResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
+import django.contrib.auth.urls
+
+from .models import UserSettings,User,Feed, Newsletters,UserSubs, Tags
+from hashlib import blake2b
+from django.core.paginator import Paginator
+from imapbox import Imapbox
+from django.conf import settings
+from pprint import pprint
+import re
+from bs4 import BeautifulSoup
+from utils import MailUtils
+from datetime import datetime
+import pytz
+import logging
+
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.dispatch import receiver
+
+
+def log_the_request(view_func):
+    def log_decorator(request,*args, **kwargs):
+        log("",logging.INFO,request)
+        return view_func(request, *args, ** kwargs)
+    return log_decorator
+
+
+def log(msg,level,request):
+    # {ip} {user} {asctime} {method} {path} {scheme} {session_id} {message}
+    #pprint(dir(request.session))
+    extra = dict()
+
+    if 'REMOTE_ADDR' in request.headers:
+        extra['ip'] = request.headers['REMOTE_ADDR']
+    else:
+        extra['ip'] = "-"
+
+    if hasattr(request,'user'):
+        if not request.user.is_anonymous:
+            extra['user'] = request.user.id
+        elif request.method == 'POST':
+            for key in ('username','email'):
+                if key in request.POST:
+                    extra['user'] = request.POST[key]
+                    break
+
+        if not 'user' in extra:
+            extra['user'] = '-'
+
+    extra['path'] = request.get_full_path_info()
+    extra['method'] = request.method
+    extra['scheme'] = request.scheme
+
+    extra['session_id'] = request.session.session_key
+    # do not log session_id as is, log its hash: owasp guideline
+    if extra['session_id'] is not None:
+        h = blake2b(extra['session_id'].encode('utf-8'),digest_size=20)
+        extra['session_id'] = h.hexdigest()
+
+    logger = logging.getLogger("app")
+    logger.log(level,msg,extra=extra)
+
+
+@receiver(user_logged_in)
+def post_login(sender, user, request, **kwargs):
+    log("login successful", logging.INFO, request)
+    if user.is_superuser:
+        return
+
+    user = UserSettings.objects.filter(user_id=user.id).exclude(pseudo_email="")
+    if user:
+        user = user[0]
+        request.session['pseudo_email'] = user.pseudo_email
+
+
+@receiver(user_logged_out)
+def post_logout(sender,user, request, **kwargs):
+    log("user logged out", logging.INFO, request)
+
+
+@receiver(user_login_failed)
+def on_login_failed(sender,request,**kwrgs):
+    log("Error:login failed",logging.INFO, request)
+
+
+@log_the_request
+def index(request):
+    return render(request, 'landing.html', {})
+
+
+@log_the_request
+def register_user(request):
+
+    form = UserCreationForm()
+    error = None
+
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password1']
+        user_exists = User.objects.filter(username=username)
+
+        if not user_exists:
+            form = UserCreationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                user = authenticate(request, username=username, password=password)
+                print(user)
+                if user is not None:
+                    h = blake2b(digest_size=20)
+                    h.update(username.encode('utf-8'))
+                    pseudo_email = h.hexdigest()
+                    us = UserSettings(user_id=user,pseudo_email=pseudo_email)
+                    us.save()
+                    user.email = user.username
+                    user.save()
+                    request.session['pseudo_email'] = pseudo_email
+                    login(request,user)
+
+                    log("New user signed up:"+username, logging.INFO,request)
+
+                    return redirect(reverse('tour'))
+                else:
+                    error = "Automatic user authentication failed. Please try again. "
+            else:
+                error = "Ouch ..error occurred processing input. Please try again."
+                for err in form.errors:
+                    error += err+":"+form.errors[err]
+        else:
+            error = "Ooops..Email address is already taken. Try again or use password reset link to recover your account."
+
+        log("Error: user registration failed:" + username + ", error:" + error, logging.ERROR, request)
+
+    return render(request,'web/register_user.html', {'form':form, 'extra_context':{ 'error':error}})
+
+
+@log_the_request
+@login_required
+def user_feed(request,nwl_id=None,filterConfirmation=False):
+
+    feed = Feed.objects.filter(user_id = request.user.id).filter(is_confirmation=filterConfirmation).order_by('-ts')
+    nwl = None
+    error = ""
+
+    if nwl_id:
+        feed = feed.filter(nwl_id = nwl_id)
+        nwl = Newsletters.objects.filter(id = nwl_id)
+        if nwl:
+            nwl = nwl[0]
+        else:
+            error = "[1023] Sorry. Its strange but couldn't find newsletter in our records. This must be an error. "
+
+    paginator = Paginator(feed, per_page=25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    mails = []
+    mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
+
+    for record in page_obj.object_list:
+
+        msg = mbox.get_message_by_id(record.message_id)
+
+        mail = dict()
+        mail['message_id'] = record.message_id
+        mail['subject'] = msg.get('Subject')
+
+        frm = msg.get('From')
+        frm = re.sub('<.*>', '', frm)
+        mail['from'] = frm.strip()
+        '''body = ""
+        for part in msg.walk():
+            if part.get_content_type() == 'text/html':
+                body += part.as_string()
+        #print(msg.get_body().get_content())
+        print(body)'''
+        body = msg.get_body().get_content()
+        soup = BeautifulSoup(body, 'html.parser')
+        txt_nodes = soup.find_all('p')
+        txt = ""
+        for txt_node in txt_nodes:
+            txt += " " + txt_node.get_text().strip()
+            if len(txt) > 600:
+                break;
+
+        if not txt:
+            txt_nodes = soup.body.find_all(MailUtils.find_node_that_has_text)
+            for txt_node in txt_nodes:
+                txt += " " + txt_node.get_text().strip()
+                if len(txt) > 600:
+                    break;
+
+        if not txt:
+            txt = soup.body.get_text()
+
+        #print("-------------")
+        #print(txt[:600])
+        # print(txt)
+
+        mail['snippet'] = txt[:600]
+        mail['x_time_ago'] = MailUtils.get_x_time_ago(msg)
+
+        if nwl_id:
+            mail['tags'] = record.nwl_id.get_tags()
+
+        mails.append(mail)
+
+    context = { 'mails':mails, 'nwl':nwl, 'page_obj':page_obj, 'error':error }
+    return render(request, "feed.html", context)
+
+
+@log_the_request
+@login_required
+def get_letter(request, message_id):
+
+    mbox = Imapbox(settings.IMAP_HOST, settings.IMAP_USER, settings.IMAP_PASSWORD)
+    email = mbox.get_message_by_id(message_id)
+
+    title = email.get('Subject')
+
+    frm = email.get('From')
+    re.sub('<.*>', '', frm)
+    author = frm.strip()
+
+    ts = email.get('Date')
+
+    # Fri, 01 Feb 2019 02:07:22 +0000 (UTC)
+    # Fri,  8 Mar 2019 23:06:46 +0000
+
+    ts = re.sub("\([A-Z]{3}\)", "", ts)
+    ts = ts.strip()
+
+    mailts = datetime.strptime(ts, "%a, %d %b %Y %H:%M:%S %z")
+    mailts = mailts.astimezone(pytz.utc)
+    mailts = mailts.strftime("%a, %d %b %H:%M:%S")
+    mailts = "%s UTC" % mailts
+
+    context = { 'ts':mailts, 'message_id':message_id, 'title':title, 'author':author }
+    return render(request, 'letter.html',context)
+
+
+@log_the_request
+@login_required
+@xframe_options_exempt
+def get_letter_content(request,message_id):
+
+    mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
+    email = mbox.get_message_by_id(message_id)
+    #print(email.get_body())
+    return HttpResponse(email.get_body().get_content())
+
+
+@log_the_request
+@login_required
+def my_sub(request):
+
+    subscriptions = UserSubs.objects.filter(user_id=request.user)
+    paginator = Paginator(subscriptions, per_page=25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "mysub.html", { 'page_obj':page_obj })
+
+
+@log_the_request
+def explore(request,tag="all"):
+    tag = tag.strip()
+    if tag != "all":
+        print("tag:",tag)
+        letters = Newsletters.objects.filter(tags__tag=tag).order_by('id')
+    else:
+        letters = Newsletters.objects.all().order_by('id')
+
+    paginator = Paginator(letters, per_page=25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    tags = Tags.objects.filter().values_list('tag',flat=True)
+    follow = None
+    if 'follow' in request.session:
+        follow = request.session['follow']
+        del request.session['follow']
+
+    return render(request, "explore.html", { 'page_obj':page_obj, 'tags':tags, 'follow':follow })
+
+
+@log_the_request
+@login_required
+def bookmark(request):
+    user = UserSettings.objects.filter(user_id=request.user.id)
+    if user:
+        user = user[0]
+    return render(request,'bookmarklet.html',{'pseudo_email':user.pseudo_email})
+
+
+@log_the_request
+def follow(request, next):
+    nwl = Newsletters.objects.filter(pk=next).values('letter','url','author')
+    if nwl:
+        nwl = nwl[0]
+
+    request.session['follow'] = nwl
+
+    if not request.user.is_authenticated:
+        return redirect(reverse('register'))
+    else:
+        return redirect('/explore')
+
+
+@log_the_request
+def search_letters(request):
+    print("assdsad")
+    if request.method == 'POST':
+        term = request.POST['term']
+        print("term",term)
+        letters = Newsletters.objects.filter(
+            Q(letter__icontains=term) |
+            Q(desc__icontains=term) |
+            Q(author__icontains=term) |
+            Q(url__icontains=term) |
+            Q(tags__tag__icontains=term)
+        )
+
+        paginator = Paginator(letters, per_page=25)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(request, "explore.html", {'page_obj': page_obj, 'term': term})
+    else:
+        return redirect('/explore')
+
+
+@log_the_request
+def tour(request):
+    return render(request,"tour.html")

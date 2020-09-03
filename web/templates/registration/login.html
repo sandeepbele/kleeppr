@@ -1,0 +1,53 @@
+
+{% extends "base.html" %}
+
+
+
+{% block page_content %}
+
+
+    <div class="container-fluid">
+        <div class="d-flex justify-content-center mt-5 ">
+
+            <div class="card w-50 ">
+                <div class="card-header ">
+                    <h4>Sign into Kleeppr</h4>
+                    <h6 class="text-muted ">Your alternate inbox for newsletters</h6>
+                </div>
+
+                {% if form.errors %}
+                    <p>Your username and password didn't match. Please try again.</p>
+                {% endif %}
+
+                <div class="card-body ">
+
+                    <form id="login_user_form" action="{% url 'login' %}" method="post" name="login_user_form" class="needs-validation" novalidate>
+
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="username">Email address </label>
+                            <input type="email" class="form-control" name="username" id="username" placeholder="joe@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password"class="form-control" name="password" id="password" placeholder="<super secret strong password>">
+                        </div>
+
+                        <input id="next" name="next" type="hidden" value="{{ next }}">
+
+                        <button type="submit" class="btn btn-secondary" name="submit" value="Login">Sign In</button>
+                    </form>
+                </div>
+
+                <div class="card-footer">
+                    <div>Don't have account? <a class="card-link" href="{% url 'register' %}">Sign up</a> </div>
+                    <div>Forgot Password? Click here: <a class="card-link" href="{% url 'password_reset' %}">Reset Password</a> </div>
+                    <!--div>Forgot username or password? Send us an email at <a class="card-link" href="mailto:account@kleeppr.com">account@kleeppr.com</a> </div-->
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

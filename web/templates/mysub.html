@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% include 'navbar.html' %}
+
+{% block page_content %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- for small screens col-12: start will all space, all 12 columns, show one horizontal column -->
+            <!-- have 2 coulmn width for medium and up-->
+            <div class="col-12 col-md-2">
+                <!-- flex-xl-column: stack/show vertical nav only for anything above extra small screens-->
+                {% comment %}
+                <nav class="nav tags flex-md-column nav-fill nav-pills">
+                    <a class="nav-link {%- if selected_tag == 'all' %} active{% endif %}" href="{{ url_for('website.explore',tag='all') }}">All</a>
+                    {% for tag in tags %}
+
+                        <a class="nav-link {%- if selected_tag == tag.tags %} active{% endif %}"
+                       href="{{ url_for('website.explore',tag=tag.tags) }}">{{ tag.tags}}</a>
+                    {% endfor %}
+
+                </nav>
+                {% endcomment %}
+            </div>
+
+            <div class="col">
+                <div class="container">
+
+                {% if not page_obj.object_list %}
+                     <div class="alert alert-warning fade show mt-3" role="alert">
+                       You have no active subscriptions. Please <a href="{% url 'explore' %}">explore</a> interesting newsletters and subscribe to start receiving them in your feed.
+                     </div>
+
+                {% else %}
+                <div class="d-flex flex-row justify-content-between mt-md-3">
+                    <div></div>
+                 <div class="nav">
+                         <ul class="pagination pagination-sm">
+                             <li class="page-item text-center small text-muted m-2">
+
+                                     {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+                             </li>
+                            {% if page_obj.has_previous %}
+                             <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; first</a>
+                             </li>
+                             <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                             </li>
+                            {% endif %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                 </div>
+                </div>
+                    <ul class="list-group list-group-flush">
+                        {% for card in page_obj.object_list %}
+                         <li class="list-group-item">
+                            <div class="card border-0">
+
+                            <!---img class="card-img-top" data-src="holder.js/100x180/" alt="Card image cap"-->
+
+                            <div class="card-body">
+                                 <div class="card-title">
+                                <h4> {{ card.nwl_id.letter }} </h4>
+                                <h6 class="text-muted"> By {{ card.nwl_id.author }}</h6>
+                            </div>
+                                <p class="card-text">{{ card.nwl_id.desc }} </p>
+
+
+                                <p class="card-text small text-muted">{{ card.nwl_id.get_tags }} | {{ card.nwl_id.get_frequency }}</p>
+
+                                <a href="{% url 'nwl_feed' nwl_id=card.nwl_id.id %}" class="link">Show Letters</a>
+                                {% if card.unsub_url != "unknown" %}
+                                <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-primary ml-1">Unsubscribe</a>
+                                {% endif %}
+
+                                </div>
+                        </div>
+                         </li>
+                        {% endfor %}
+                   </ul>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
