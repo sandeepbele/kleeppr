@@ -15,7 +15,11 @@
         <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
                 integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
                 crossorigin="anonymous"></script>
-
+        {% load static %}
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+        <link rel="manifest" href="{% static 'site.webmanifest' %}">
         {% block custom_js_inhead %} {% endblock %}
         <title>{ Kleeppr } your alternate mailbox for newsletters</title>
 
