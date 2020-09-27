@@ -40,10 +40,10 @@
 
                             <ul class="navbar-nav ml-md-auto pl-5">
                                  <a class="nav-link" href="{% url 'tour' %}">Tour</a>
-                                {% if request.session.pseudo_email %}
+                                {% if request.session.appid %}
                                     <a tabindex="0" class="nav-link" role="button" data-toggle="popover" data-placement="bottom"
                                        data-trigger="focus" title="Your Kleeppr Email"
-                                       data-content="u+{{ request.session.pseudo_email }}@kleeppr.com">
+                                       data-content="{{ request.session.appid }}@kleeppr.com">
                                         Email
                                     </a>
                                     <a class="nav-link" href="/bookmark">Bookmarklet</a>

@@ -5,7 +5,193 @@ import re, requests, tldextract
 from pprint import pprint
 from datetime import datetime
 import pytz
-from web.models import UserSettings,Feed,Newsletters,UserSubs,User
+from web.models import UserSettings,Feed,Newsletters,UserSubs,User,Publisher
+from .rule_parser import process_rule, is_umbrella_publisher, is_publishing_platform
+from bs4 import BeautifulSoup
+
+
+def parse_message_v2(uid,email_message):
+
+    nwl = dict()
+    nwl['id'] = uid
+    nwl['m_from'] = email_message.get("From")
+    nwl['m_subject'] = email_message.get("Subject")
+    nwl['m_unsub_header'] = email_message.get("List-Unsubscribe")
+    nwl['list_id'] = email_message.get("List-Id")
+
+    if not nwl['m_unsub_header']:
+        print("rejected:not a mailing list message:", uid)
+        return None
+
+    nwl['m_to'] = email_message.get("To")
+    nwl['m_date'] = email_message.get("Date")
+
+    m = re.search('([^<]+)\s*<([^@]+@([^>]+))>', nwl['m_from'])
+    nwl_sender = m.group(1)
+    nwl_email = m.group(2)
+    nwl_domain = m.group(3)
+
+    parsed_url = tldextract.extract(nwl_domain)
+    print(parsed_url.domain, parsed_url.suffix)
+    parsed_domain = parsed_url.domain + "." + parsed_url.suffix
+
+    nwl['sender'] = nwl_sender.strip()
+    nwl['sender_email'] = nwl_email.strip()
+    nwl['sender_email_domain'] = parsed_domain.strip()
+
+    soup = BeautifulSoup(email_message.get_body().get_content(),'html.parser')
+    nwl['body'] = soup.get_text()
+
+    (letter, author) = process_rule(nwl)
+    nwl['letter'] = letter
+    nwl['author'] = author
+
+    msg_body = email_message.get_body()
+
+    # find unsubscribe link
+    m = re.search('href="([^"]+unsubscribe[^"]+)"', str(msg_body))
+    if m:
+        nwl['unsub_link'] = m.group(1)
+    else:
+        m = re.search("(http.*?(unsub|disable).*?)>", nwl['m_unsub_header'])
+        if m:
+            nwl['unsub_link'] = m.group(1)
+        else:
+            nwl['unsub_link'] = "unknown"
+
+    # shadow email
+    #user_prefix = settings.IMAP_USER_PREFIX
+    #m = re.search(user_prefix + '\+([^@]+)@', nwl['m_to'])
+    #if m:
+    #    nwl['appid'] = m.group(1)
+    #elif nwl['m_to'].startswith('u'):
+    #    nwl['appid'] = nwl['m_to'][:nwl['m_to'].index('@')]
+
+
+    # formatted date
+    ts = re.sub("\([A-Z]{3}\)", "", nwl['m_date'])
+    ts = ts.strip()
+
+    mailts = datetime.strptime(ts, "%a, %d %b %Y %H:%M:%S %z")
+    mailts = mailts.astimezone(pytz.utc)
+    nwl['ts'] = mailts.strftime("%Y-%m-%d %H:%M:%S%z")
+
+    # is conformation email?
+    is_confirmation = False
+    #sub = email_message.get('Subject')
+    if (re.search('(confirm|verify)\s+', nwl['m_subject'], re.I)
+        or re.search('confirm', nwl['sender_email'], re.I)
+        or re.search(
+            'href="([^"]+confirm\W[^"]+)"', str(msg_body))) \
+        or re.search('complete your signup',nwl['m_subject'],re.I)  \
+        and not is_confirmation:
+
+        is_confirmation = True
+
+    nwl['possible_confirmation_email'] = is_confirmation
+
+    return nwl
+
+
+def insert_to_db(nwl,user):
+
+    ''' # associate user
+    user = None
+    if 'appid' in nwl:
+        #user = UserSettings.objects.filter(appid__exact=nwl['appid'])
+        user = UserSettings.objects.filter(user_id=User.objects.filter(username='admin@kleeppr.com').get())
+
+    if not user:
+        user = UserSettings.objects.filter(user_id=User.objects.filter(appid=).get())
+
+    if user:
+        user = user[0]
+    else:
+        print("Error")
+        return'''
+
+    # if list id?
+    ## check if list_id in db
+    ## yes - no?
+    ### yes - get its id and add to feed against it
+    ### no - create new publisher record, create default newsletter
+    # elif letter?
+    ## yes - no?
+    ### yes - get its id and add to feed against it
+    ## elif domain?
+    ### yes - get its id and add to feed against it
+    # else
+    ## create publisher with domain and create newsletter with letter
+
+    if is_umbrella_publisher(nwl['sender_email_domain']):
+        dbnwl = Newsletters.objects.filter(letter=nwl['letter'])
+    else:
+        dbnwl = Newsletters.objects.filter(sender_email__icontains=nwl['sender_email_domain'])
+
+    if dbnwl:
+        dbnwl = dbnwl[0]
+        if dbnwl is 'Evening Edition':
+            pass
+    else:
+        if is_publishing_platform(nwl['sender_email']):
+            pub = Publisher.objects.filter(domain=nwl['sender_email'])
+        elif is_umbrella_publisher(nwl['sender_email_domain']):
+            pub = Publisher.objects.filter(domain=nwl['sender_email_domain'])
+        else:
+            pub = Publisher.objects.filter(name=nwl['author'], domain=nwl['sender_email_domain'])
+
+        if pub:
+            pub = pub[0]
+        else:
+            pub = Publisher.objects.create(name=nwl['author'], domain=nwl['sender_email_domain'])
+            pub.save()
+            print("### created pub:", pub)
+
+        print("**",pub)
+        dbnwl = Newsletters.objects.create(list_id=nwl['list_id'], letter=nwl['letter'], sender_email=nwl['sender_email'], url=nwl['sender_email_domain'], author=nwl['author'],
+                                          publisher=pub)
+        dbnwl.save()
+        with open("/Users/sandeep/Documents/SB_Sources/Kleeppr-django/kleeppr4/runtime/logs/verification.logs","w+") as fp:
+            fp.write("\n%s,%d,%s,%s,%s,%d" % (datetime.now(),dbnwl.id,nwl['id'],nwl['m_from'],nwl['m_subject'],pub.id))
+
+        print("### created nwl:",dbnwl)
+
+    # add to usersub
+    usersub = UserSubs.objects.filter(user_id=user.user_id).filter(nwl_id=dbnwl.id)
+
+    if not usersub:
+        usersub = UserSubs.objects.create(user_id=user.user_id,
+                                     nwl_id=dbnwl,
+                                     unsub_url=nwl['unsub_link'], feed_count=1)
+        usersub.save()
+
+    else:
+        usersub = usersub[0]
+
+    f = Feed.objects.filter(user_id=user.user_id, message_id=nwl['id'])
+
+    # if feed row is present then update newsletter associated with it else create new row
+    if f:
+        f = f[0]
+        if f.nwl_id != dbnwl:
+            print("#updated feed row#",f.id," nwl_id from:",f.nwl_id," to:",dbnwl)
+            f.nwl_id = dbnwl
+            f.save()
+            print("#check update:#",f.id," new nwl_id:",f.nwl_id)
+
+    else:
+        is_confirmation_email = False
+        if usersub.feed_count == 1 and nwl['possible_confirmation_email']:
+            is_confirmation_email = True
+
+        f = Feed.objects.create(user_id=user.user_id, message_id=nwl['id'], ts=nwl['ts'],
+                                nwl_id=dbnwl,
+                                is_confirmation=is_confirmation_email)
+        f.save()
+
+        usersub.feed_count += 1
+        usersub.save()
+        print("#added new feed row")
 
 
 def parse_message(uid,email_message):
@@ -22,6 +208,7 @@ def parse_message(uid,email_message):
     nwl['m_subject'] = email_message.get("Subject")
     nwl['m_date'] = email_message.get("Date")
     nwl['m_unsub_header'] = email_message.get("List-Unsubscribe")
+    nwl['m_list_id'] = email_message.get("List-Id")
 
     if not nwl['m_unsub_header']:
         print("rejected:not a mailing list message:",uid)
@@ -35,6 +222,7 @@ def parse_message(uid,email_message):
 
     nwl['sender_name'] = nwl_sender.strip()
     nwl['sender_email'] = nwl_email.strip()
+
 
     # try bunch of urls: keep one that succeeds
     urls = []
@@ -135,7 +323,7 @@ def parse_message(uid,email_message):
     user_prefix = settings.IMAP_USER_PREFIX
     m = re.search(user_prefix + '\+([^@]+)@', nwl['m_to'])
     if m:
-        nwl['pseudo_email'] = m.group(1)
+        nwl['appid'] = m.group(1)
 
     # formatted date
     ts = re.sub("\([A-Z]{3}\)", "", nwl['m_date'])
@@ -158,18 +346,27 @@ def parse_message(uid,email_message):
     return nwl
 
 
+def get_domain(url):
+    parsed_url = tldextract.extract(url)
+    print(parsed_url.domain, parsed_url.suffix)
+    parsed_domain = parsed_url.domain + "." + parsed_url.suffix
+    return parsed_domain
+
+
 def add_to_db(nwl):
 
     # already has it?
-    message = Feed.objects.filter(message_id=nwl['id'])
-    if message:
-        print("ERROR")
-        return
+    #message = Feed.objects.filter(message_id=nwl['id'])
+    #if message:
+
+
+    #    print("ERROR")
+    #    return
 
     # associate user
     user = None
-    if 'pseudo_email' in nwl:
-        user = UserSettings.objects.filter(pseudo_email__exact=nwl['pseudo_email'])
+    if 'appid' in nwl:
+        user = UserSettings.objects.filter(appid__exact=nwl['appid'])
 
     if not user:
         user = UserSettings.objects.filter(user_id=User.objects.filter(username='admin@kleeppr.com').get())
@@ -179,6 +376,15 @@ def add_to_db(nwl):
     else:
         print("Error")
         return
+
+    # check against sender list
+    matched_nwls = Newsletters.objects.filter(sender_email=nwl['sender_email'])
+    if not matched_nwls:
+        matched_nwls = Newsletters.objects.filter(author=nwl['sender_name'])
+    if not matched_nwls:
+        get_domain()
+    # if not check against sender name
+    # if not match against sender domain
 
     # associate preexisting nwl record
     matched_nwls = Newsletters.objects.filter(sender_email=nwl['sender_email']).filter(author=nwl['sender_name'])
@@ -210,7 +416,6 @@ def add_to_db(nwl):
     f.save()
 
 
-
 def run(*args):
     '''
     #message_id = "27510" # substack
@@ -226,15 +431,17 @@ def run(*args):
     message = imapbox.get_message_by_id(message_id)
     print(message)
     #parse_message(message_id,message)
-    '''
 
-    #message_ids = ["27510","26912","27283","27245","27455","27556"]
-    message_ids = ["27473"]
+'''
+    #message_ids = ["27510","26912","27283","27245","27455","27556","27473"]
+    message_ids = ["28850"]
 
     for msg_id in message_ids:
         imapbox = Imapbox(settings.IMAP_HOST, settings.IMAP_USER,
                           settings.IMAP_PASSWORD)
 
         message = imapbox.get_message_by_id(msg_id)
-        #print(message)
+        print(message)
         parse_message(msg_id,message)
+
+

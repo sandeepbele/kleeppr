@@ -6,8 +6,8 @@ from imapclient import IMAPClient
 from pprint import pprint
 from email import policy
 import mailcache
-
-
+from web.appid import get_salted_password
+from django.conf import settings
 #HOST = "imap.gmail.com"
 #USERNAME = "helloclipit"
 #PASSWORD = "ttybhgxahhkealfa"
@@ -18,7 +18,15 @@ class Imapbox:
     def __init__(self,_host,_username,_password):
         self.HOST = _host
         self.USERNAME = _username
-        self.PASSWORD = _password
+
+        if _username.startswith("u+"):
+            self.USERNAME = "u"
+            self.PASSWORD = settings.IMAP_PASSWORD
+        else:
+            self.PASSWORD = get_salted_password(_username,_password)
+
+        self.USERNAME = self.USERNAME + "@kleeppr.com"
+
         self.ssl_context = ssl.create_default_context()
         # don't check if certificate hostname doesn't match target hostname
         self.ssl_context.check_hostname = False
@@ -30,7 +38,6 @@ class Imapbox:
 
     def sync_messages(self,historyId=1, userId='me'):
         pass
-
 
     def list_messages(self,since_ts,limit):
         with IMAPClient(self.HOST, ssl_context=self.ssl_context) as server:

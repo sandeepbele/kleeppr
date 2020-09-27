@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
@@ -9,7 +10,7 @@ from django.http import HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 import django.contrib.auth.urls
 
-from .models import UserSettings,User,Feed, Newsletters,UserSubs, Tags
+from .models import UserSettings,User,Feed, Newsletters,UserSubs, Tags,AppIdStore
 from hashlib import blake2b
 from django.core.paginator import Paginator
 from imapbox import Imapbox
@@ -21,6 +22,8 @@ from utils import MailUtils
 from datetime import datetime
 import pytz
 import logging
+import threading
+from django.http import Http404
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
@@ -75,10 +78,10 @@ def post_login(sender, user, request, **kwargs):
     if user.is_superuser:
         return
 
-    user = UserSettings.objects.filter(user_id=user.id).exclude(pseudo_email="")
+    user = UserSettings.objects.filter(user_id=user.id).exclude(appid="")
     if user:
         user = user[0]
-        request.session['pseudo_email'] = user.pseudo_email
+        request.session['appid'] = user.appid
 
 
 @receiver(user_logged_out)
@@ -113,20 +116,32 @@ def register_user(request):
                 form.save()
                 user = authenticate(request, username=username, password=password)
                 print(user)
+
                 if user is not None:
-                    h = blake2b(digest_size=20)
-                    h.update(username.encode('utf-8'))
-                    pseudo_email = h.hexdigest()
-                    us = UserSettings(user_id=user,pseudo_email=pseudo_email)
-                    us.save()
-                    user.email = user.username
-                    user.save()
-                    request.session['pseudo_email'] = pseudo_email
-                    login(request,user)
+                    with transaction.atomic():
 
-                    log("New user signed up:"+username, logging.INFO,request)
+                        appid = AppIdStore.objects.select_for_update(skip_locked=True).filter(assigned=False).first()
+                        if appid:
+                            print("email got", appid.app_id, " assigned:", appid.assigned)
+                            us = UserSettings(user_id=user, appid=appid.app_id)
+                            us.save()
+                            user.email = user.username
+                            user.save()
+                            appid.assigned = True
+                            appid.save()
 
-                    return redirect(reverse('tour'))
+                            request.session['appid'] = appid.app_id
+                            login(request,user)
+
+                            log("New user signed up:"+username, logging.INFO,request)
+
+                            return redirect(reverse('tour'))
+                        else:
+
+                            log("[****ATTN***]Critical:user creation failed due to insufficient emails:"+username,logging.ERROR,request)
+                            error = "Oops,something went wrong! This is unusual and we are very sorry. " \
+                                    "We will fix the issue and get back to you on email you just provided." \
+                                    "Thank you - Team Kleeppr"
                 else:
                     error = "Automatic user authentication failed. Please try again. "
             else:
@@ -145,7 +160,7 @@ def register_user(request):
 @login_required
 def user_feed(request,nwl_id=None,filterConfirmation=False):
 
-    feed = Feed.objects.filter(user_id = request.user.id).filter(is_confirmation=filterConfirmation).order_by('-ts')
+    feed = Feed.objects.filter(user_id = request.user.id).order_by('-ts')
     nwl = None
     error = ""
 
@@ -156,13 +171,25 @@ def user_feed(request,nwl_id=None,filterConfirmation=False):
             nwl = nwl[0]
         else:
             error = "[1023] Sorry. Its strange but couldn't find newsletter in our records. This must be an error. "
+    else:
+        feed = feed.filter(is_confirmation=filterConfirmation)
 
     paginator = Paginator(feed, per_page=25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    app_id_record = AppIdStore.objects.filter(app_id=request.session['appid']).first()
+    if not app_id_record:
+        log("app_id record not found for %s" % request.session['appid'], logging.ERROR)
+        raise Http404("Something weired has happened. We can't serve your request. Please try again")
+
+    imap_user = app_id_record.app_id
+    imap_secret = app_id_record.app_id_secret
+
+    mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
+
     mails = []
-    mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
+    #mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
 
     for record in page_obj.object_list:
 
@@ -220,7 +247,15 @@ def user_feed(request,nwl_id=None,filterConfirmation=False):
 @login_required
 def get_letter(request, message_id):
 
-    mbox = Imapbox(settings.IMAP_HOST, settings.IMAP_USER, settings.IMAP_PASSWORD)
+    app_id_record = AppIdStore.objects.filter(app_id=request.session['appid']).first()
+    if not app_id_record:
+        log("app_id record not found for %s" % request.session['appid'],logging.ERROR)
+        raise Http404("Something weired has happened. We can't serve your request. Please try again")
+
+    imap_user = app_id_record.app_id
+    imap_secret = app_id_record.app_id_secret
+
+    mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
     email = mbox.get_message_by_id(message_id)
 
     title = email.get('Subject')
@@ -251,7 +286,15 @@ def get_letter(request, message_id):
 @xframe_options_exempt
 def get_letter_content(request,message_id):
 
-    mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
+    app_id_record = AppIdStore.objects.filter(app_id=request.session['appid']).first()
+    if not app_id_record:
+        log("app_id record not found for %s" % request.session['appid'], logging.ERROR)
+        raise Http404("Something weired has happened. We can't serve your request. Please try again")
+
+    imap_user = app_id_record.app_id
+    imap_secret = app_id_record.app_id_secret
+
+    mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
     email = mbox.get_message_by_id(message_id)
     #print(email.get_body())
     return HttpResponse(email.get_body().get_content())
@@ -276,7 +319,9 @@ def explore(request,tag="all"):
         print("tag:",tag)
         letters = Newsletters.objects.filter(tags__tag=tag).order_by('id')
     else:
-        letters = Newsletters.objects.all().order_by('id')
+        letters = Newsletters.objects.order_by('id')
+
+    letters = [ letter for letter in letters if letter.is_complete() ]
 
     paginator = Paginator(letters, per_page=25)
     page_number = request.GET.get('page')
@@ -297,7 +342,7 @@ def bookmark(request):
     user = UserSettings.objects.filter(user_id=request.user.id)
     if user:
         user = user[0]
-    return render(request,'bookmarklet.html',{'pseudo_email':user.pseudo_email})
+    return render(request,'bookmarklet.html',{'appid':user.appid})
 
 
 @log_the_request
