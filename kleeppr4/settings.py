@@ -31,7 +31,7 @@ for dir in ("db","logs","cache"):
 from dotenv import load_dotenv
 load_dotenv(os.path.join(get_runtime_dir(), '.env'))
 
-for critical_env_var in ('DJANGO_EMAIL_HOST_PASSWORD','IMAP_PASSWORD','DJANGO_ALLOWED_HOST','DJANGO_DEBUG'):
+for critical_env_var in ('DJANGO_EMAIL_HOST_PASSWORD','IMAP_PASSWORD','DJANGO_ALLOWED_HOST','DJANGO_DEBUG','POSTGRES_PASSWORD'):
     if not os.getenv(critical_env_var):
         raise ImproperlyConfigured(critical_env_var)
         pass
@@ -95,10 +95,28 @@ WSGI_APPLICATION = 'kleeppr4.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
+DEPRECATED_DATABASES_OLD = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(get_runtime_dir(),"db",'db.sqlite3'),
+    },
+    'OPTIONS': {
+        'timeout':5000
+    },
+
+}
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+        'TEST': {
+            'NAME':'kleeppr_test'
+        }
     }
 }
 

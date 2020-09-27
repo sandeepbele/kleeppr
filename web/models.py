@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.utils.timezone import now
 
 
 class Tags(models.Model):
@@ -10,20 +11,35 @@ class Tags(models.Model):
         return str(self.tag)
 
 
-class Newsletters(models.Model):
+class Publisher(models.Model):
+    name = models.TextField()
+    domain = models.TextField()
+    is_verified = models.BooleanField(default=False)
 
+    def __str__(self):
+        return str(self.name)
+
+
+class Newsletters(models.Model):
+    list_id = models.TextField(null=True)
     letter = models.TextField(null=True)
     sender_email = models.TextField(null=True)
     url = models.TextField(null=True)
     desc = models.TextField(null=True)
     author = models.TextField(null=True)
     author_url = models.TextField(null=True)
-    frequency = models.TextField(choices=[("D","daily"),("W","weekly")],null=True)
+    frequency = models.TextField(choices=[("D","daily"),("W","weekly"),("FW","few times a week"),
+                                          ("M","monthly"),("FW","few times a month"),("R","random")],null=True)
     tags = models.ManyToManyField(Tags)
-    extra_info = models.TextField(null=True,default="")
+    extra_info = models.TextField(null=True,default="None")
+
+    is_active = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True,null=True)
     updated_at = models.DateTimeField(auto_now=True,null=True)
+
+    publisher = models.ForeignKey(Publisher,default=None,on_delete=models.CASCADE)
 
     def get_tags(self):
         tags = self.tags.all().values_list('tag',flat=True)
@@ -48,16 +64,15 @@ class Newsletters(models.Model):
         return True
 
     def __str__(self):
-        return self.letter
+        return self.letter or ""
 
 
 class Feed(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     message_id = models.TextField(null=True)
-    ts = models.DateTimeField(default=datetime.now())
+    ts = models.DateTimeField(default=now())
     nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
-    history_id = models.TextField(null=True)
     is_confirmation = models.BooleanField(default=False)
 
 
@@ -65,7 +80,8 @@ class UserSettings(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.EmailField(null=True)
-    pseudo_email = models.TextField(null=True)
+    appid = models.TextField(null=True)
+    feeder_ts = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -81,3 +97,15 @@ class UserSubs(models.Model):
          f = Feed.objects.filter(user_id=self.user_id).filter(nwl_id=self.nwl_id).\
             filter(is_confirmation=True)
          return f.exists() and self.feed_count > 0
+
+
+class AppIdStore(models.Model):
+
+    app_id = models.TextField()
+    app_id_secret = models.TextField()
+    assigned = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    assigned_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return str(self.id)
