@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
-from django.utils.timezone import now
 
 
 class Tags(models.Model):
@@ -71,7 +70,7 @@ class Feed(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     message_id = models.TextField(null=True)
-    ts = models.DateTimeField(default=now())
+    ts = models.DateTimeField(default=datetime.now,null=True)
     nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
     is_confirmation = models.BooleanField(default=False)
 
