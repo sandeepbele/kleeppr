@@ -1,6 +1,28 @@
-import re
+import re, sys
 from datetime import datetime, timezone
 from bs4 import NavigableString, Tag
+import io
+
+class StdoutToLogger(object):
+    def __init__(self,_logger):
+        self.terminal = sys.stdout
+        self.logger = _logger
+        self.buf_msg = ""
+
+    def write(self, message):
+        # in python 3, print takes list args .. code below waits for whole list
+        if message == "\n":
+            self.logger.info(self.buf_msg)
+            self.buf_msg = ""
+        else:
+            self.buf_msg += message
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        #this handles the flush command by doing nothing.
+        #you might want to specify some extra behavior here.
+        pass
+
 
 class MailUtils:
 

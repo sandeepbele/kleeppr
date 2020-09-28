@@ -40,7 +40,7 @@ def parse_message_v2(uid,email_message):
     nwl_domain = m.group(3)
 
     parsed_url = tldextract.extract(nwl_domain)
-    print(parsed_url.domain, parsed_url.suffix)
+    #print(parsed_url.domain, parsed_url.suffix)
     parsed_domain = parsed_url.domain + "." + parsed_url.suffix
 
     nwl['sender'] = nwl_sender.strip()
@@ -103,21 +103,6 @@ def parse_message_v2(uid,email_message):
 
 def insert_to_db(nwl,user):
 
-    ''' # associate user
-    user = None
-    if 'appid' in nwl:
-        #user = UserSettings.objects.filter(appid__exact=nwl['appid'])
-        user = UserSettings.objects.filter(user_id=User.objects.filter(username='admin@kleeppr.com').get())
-
-    if not user:
-        user = UserSettings.objects.filter(user_id=User.objects.filter(appid=).get())
-
-    if user:
-        user = user[0]
-    else:
-        print("Error")
-        return'''
-
     # if list id?
     ## check if list_id in db
     ## yes - no?
@@ -138,8 +123,6 @@ def insert_to_db(nwl,user):
 
     if dbnwl:
         dbnwl = dbnwl[0]
-        if dbnwl is 'Evening Edition':
-            pass
     else:
         if is_publishing_platform(nwl['sender_email']):
             pub = Publisher.objects.filter(domain=nwl['sender_email'])
@@ -153,16 +136,13 @@ def insert_to_db(nwl,user):
         else:
             pub = Publisher.objects.create(name=nwl['author'], domain=nwl['sender_email_domain'])
             pub.save()
-            print("### created pub:", pub)
+            print("[insert_to_db] created new pub:", pub)
 
         print("**",pub)
         dbnwl = Newsletters.objects.create(list_id=nwl['list_id'], letter=nwl['letter'], sender_email=nwl['sender_email'], url=nwl['sender_email_domain'], author=nwl['author'],
                                           publisher=pub)
         dbnwl.save()
-        with open("/Users/sandeep/Documents/SB_Sources/Kleeppr-django/kleeppr4/runtime/logs/verification.logs","w+") as fp:
-            fp.write("\n%s,%d,%s,%s,%s,%d" % (datetime.now(),dbnwl.id,nwl['id'],nwl['m_from'],nwl['m_subject'],pub.id))
-
-        print("### created nwl:",dbnwl)
+        print("[insert_to_db] created new nwl[%d], name:%s, msg:%s, from:%s, sub:%s, pub:%d" % (dbnwl.id,dbnwl,nwl['id'],nwl['m_from'],nwl['m_subject'],pub.id))
 
     # add to usersub
     usersub = UserSubs.objects.filter(user_id=user.user_id).filter(nwl_id=dbnwl.id)
@@ -199,8 +179,6 @@ def insert_to_db(nwl,user):
 
         usersub.feed_count += 1
         usersub.save()
-        print("#added new feed row")
-
 
 def parse_message(uid,email_message):
 

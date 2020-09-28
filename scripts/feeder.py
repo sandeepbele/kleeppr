@@ -6,11 +6,12 @@ from web.models import Feed,UserSettings, AppIdStore
 from .parse_utils import parse_message, add_to_db, parse_message_v2, insert_to_db
 import logging, pytz
 from django.contrib.auth.models import User
-
+from utils import StdoutToLogger
 
 def run(*args):
 
     logger = logging.getLogger("feeder")
+    sys.stdout = StdoutToLogger(logger)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--from_ts', default='2020-01-01 00:00:00',
@@ -69,7 +70,7 @@ def run(*args):
             try:
                 imapbox = Imapbox(settings.IMAP_HOST, imap_user,
                                   imap_secret)
-
+                logger.info("[feeder]**** starting run for user:%s appid:%s",user.username,user_settings.appid)
                 count = 0
                 for uid,message in imapbox.list_messages(last_fetched_ts, limit):
                     #print("uid:",uid)
@@ -87,11 +88,11 @@ def run(*args):
 
             except Exception as e:
                 print(e)
-                logger.error("Error in fetching or parsing messages: %s" % imap_user, e)
+                logger.error("Error in fetching or parsing messages for user: %s" % imap_user, e)
 
     except Exception as e:
         print(e)
-        logger.error("Error in aquiring lock or getting last fetch time.", e)
+        logger.error("Error in feeder", e)
         sys.exit(0)
     finally:
         logger.info("Run finished... lock is released")

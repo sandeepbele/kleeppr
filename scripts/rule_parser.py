@@ -100,7 +100,7 @@ def process_rule(nwl):
             (field, regex) = author_rules[author_rule]
             author_name = match_and_extract(nwl[field], regex)
             if letter_name:
-                print("######## letter_rule matched:",letter_rule, letter_name)
+                print("[rule_parser] uid: %s, matched:%s, extracted:%s" % (nwl['id'], letter_rule, letter_name))
                 break
 
     else:
