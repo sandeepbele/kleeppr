@@ -21,7 +21,7 @@ def parse_message_v2(uid,email_message):
 
     is_mailing_list_msg = False
 
-    for h in ('List-Unsubscribe','List-Id','X-Campaign'):
+    for h in ('List-Unsubscribe','List-Id','X-Campaign','X-Rpcampaign','X-SES-Outgoing','Feedback-ID','Precedence'):
         if email_message.get(h):
             is_mailing_list_msg = True
             break;
