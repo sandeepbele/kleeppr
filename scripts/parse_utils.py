@@ -16,11 +16,19 @@ def parse_message_v2(uid,email_message):
     nwl['id'] = uid
     nwl['m_from'] = email_message.get("From")
     nwl['m_subject'] = email_message.get("Subject")
-    nwl['m_unsub_header'] = email_message.get("List-Unsubscribe")
+    nwl['m_unsub_header'] = email_message.get("List-Unsubscribe") or ""
     nwl['list_id'] = email_message.get("List-Id")
 
-    if not nwl['m_unsub_header']:
-        print("rejected:not a mailing list message:", uid)
+    is_mailing_list_msg = False
+
+    for h in ('List-Unsubscribe','List-Id','X-Campaign'):
+        if email_message.get(h):
+            is_mailing_list_msg = True
+            break;
+
+    if not is_mailing_list_msg:
+        print("[Rejected] not a mailing list message: From:%s, To:%s, MessageId:%s, Subject:%s"
+              % (email_message.get("From"), email_message.get("To"), uid, email_message.get("Subject")))
         return None
 
     nwl['m_to'] = email_message.get("To")

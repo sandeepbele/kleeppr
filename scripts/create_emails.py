@@ -35,7 +35,7 @@ def run(*args):
                     add_restrictions_cmd = "sh setup.sh email restrict list send"
                 else:
                     add_account_cmd = "sh setup.sh email add %s %s" % (imap_username,salted_password)
-                    add_restrictions_cmd = "sh setup.sh email restrict list send %s" % imap_username
+                    add_restrictions_cmd = "sh setup.sh email restrict add send %s" % imap_username
 
                 with remote_shell.cd(os.getenv("REMOTE_MAIL_SERVER_WORKDIR")):
                     result = remote_shell.run(add_account_cmd,pty=True)
