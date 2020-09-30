@@ -30,7 +30,7 @@ class Command(BaseCommand):
             remote_shell = Connection(os.getenv('REMOTE_MAIL_SERVER'),user=os.getenv('REMOTE_MAIL_SERVER_SSH_USER'))
             remote_shell.connect_kwargs.password = os.getenv('REMOTE_MAIL_SERVER_SSH_PASSWORD')
 
-            for x in range(0,args.num):
+            for x in range(0,options['num']):
                 #36^10 = 3,656,158,440,062,980 possible combinations # 3 trillion
                 email = generate_id()
                 #email = "u+demo"
@@ -39,7 +39,7 @@ class Command(BaseCommand):
                     unsalted_password = generate_password()
                     salted_password = get_salted_password(email,unsalted_password)
 
-                    if args.dry_run:
+                    if options['dry_run']:
                         add_account_cmd = "sh setup.sh email list"
                         add_restrictions_cmd = "sh setup.sh email restrict list send"
                     else:
@@ -53,7 +53,7 @@ class Command(BaseCommand):
                             result = remote_shell.run(add_restrictions_cmd,pty=True)
                             if not result.ok:
                                 print("failed to add restriction",email,result)
-                            if not args.dry_run:
+                            if not options['dry_run']:
                                 d = AppIdStore.objects.create(app_id=email, app_id_secret=unsalted_password, assigned=False)
                                 d.save()
                             print("###success:", imap_username, "   unsalted_password:", unsalted_password,

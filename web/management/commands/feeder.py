@@ -47,8 +47,8 @@ class Command(BaseCommand):
                                 user.username, user_settings.appid)
                     continue
 
-                if 'from_ts' in args:
-                    last_fetched_ts = args.from_ts
+                if 'from_ts' in options:
+                    last_fetched_ts = options['from_ts']
                 else:
                     last_fetched_ts = "2020-01-01_00:00:00"  # datetime..strftime("%Y-%m-%d %H:%M:%S")
 
@@ -57,8 +57,8 @@ class Command(BaseCommand):
                 if user_settings.feeder_ts:
                     last_fetched_ts = user_settings.feeder_ts
 
-                if 'limit' in args:
-                    limit = args.limit
+                if 'limit' in options:
+                    limit = options['limit']
                 else:
                     limit = -1
 
