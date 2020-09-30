@@ -172,10 +172,11 @@ DEFAULT_FROM_EMAIL="Kleeppr Support <noreply@kleeppr.com>"
 PASSWORD_RESET_TIMEOUT_DAYS=1
 
 IMAP_HOST="mail.kleeppr.com"
-IMAP_USER="u@kleeppr.com"
 IMAP_PASSWORD=os.getenv("IMAP_PASSWORD")
 IMAP_USER_PREFIX="u"
 CACHE_PATH= os.path.join(get_runtime_dir(),"cache")
+
+APPID_MAIL_SERVER_DOMAIN = "private.kleepprid.com"
 
 LOGGING = {
 

@@ -26,7 +26,7 @@ def run(*args):
             email = generate_id()
             #email = "u+demo"
             if email not in existing_app_emails:
-                imap_username = email + "@" + os.getenv("APPID_MAIL_SERVER_DOMAIN")
+                imap_username = email + "@" + settings.APPID_MAIL_SERVER_DOMAIN
                 unsalted_password = generate_password()
                 salted_password = get_salted_password(email,unsalted_password)
 

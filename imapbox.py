@@ -20,12 +20,11 @@ class Imapbox:
         self.USERNAME = _username
 
         if _username.startswith("u+"):
-            self.USERNAME = "u"
+            self.USERNAME = "u@kleeppr.com"
             self.PASSWORD = settings.IMAP_PASSWORD
         else:
             self.PASSWORD = get_salted_password(_username,_password)
-
-        self.USERNAME = self.USERNAME + "@kleeppr.com"
+            self.USERNAME = self.USERNAME + settings.APPID_MAIL_SERVER_DOMAIN
 
         self.ssl_context = ssl.create_default_context()
         # don't check if certificate hostname doesn't match target hostname
