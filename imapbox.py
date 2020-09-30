@@ -17,14 +17,14 @@ class Imapbox:
 
     def __init__(self,_host,_username,_password):
         self.HOST = _host
-        self.USERNAME = _username
+        self.appid = _username
 
         if _username.startswith("u+"):
             self.USERNAME = "u@kleeppr.com"
             self.PASSWORD = settings.IMAP_PASSWORD
         else:
+            self.USERNAME = _username + "@" + settings.APPID_MAIL_SERVER_DOMAIN
             self.PASSWORD = get_salted_password(_username,_password)
-            self.USERNAME = self.USERNAME + settings.APPID_MAIL_SERVER_DOMAIN
 
         self.ssl_context = ssl.create_default_context()
         # don't check if certificate hostname doesn't match target hostname
@@ -73,15 +73,15 @@ class Imapbox:
        pass
 
     def get_message_by_id(self, id):
-
-        em = mailcache.get_from_cache(id)
+        key = self.appid+"_"+str(id)
+        em = mailcache.get_from_cache(key)
         if not em:
             with IMAPClient(self.HOST, ssl_context=self.ssl_context) as server:
                 server.login(self.USERNAME, self.PASSWORD)
                 server.select_folder('INBOX', readonly=True)
                 for uid, message_data in server.fetch(id, 'RFC822').items():
                     em = email.message_from_bytes(message_data[b'RFC822'], policy=policy.default)
-                    mailcache.add_to_cache(uid,em)
+                    mailcache.add_to_cache(self.appid+"_"+str(uid),em)
         # pprint.pprint(email)
         # parse_message(email['payload'])
         return em
