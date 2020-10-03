@@ -8,6 +8,8 @@ from email import policy
 import mailcache
 from web.appid import get_salted_password
 from django.conf import settings
+from datetime import datetime
+import pytz
 #HOST = "imap.gmail.com"
 #USERNAME = "helloclipit"
 #PASSWORD = "ttybhgxahhkealfa"
@@ -42,8 +44,14 @@ class Imapbox:
         with IMAPClient(self.HOST, ssl_context=self.ssl_context) as server:
             server.login(self.USERNAME, self.PASSWORD)
             server.select_folder('INBOX', readonly=True)
-            #messages = server.search(['UNSEEN', 'SINCE', since_ts])
-            messages = server.sort(['REVERSE','DATE'],['UNSEEN', 'SINCE', since_ts])
+            # SINCE accepts just a date and not time
+            # YOUNGER is imap extension that supports querying by interval in secs
+            # this needs both mailserver and app server in same timezone, interval will be
+            # deducted from mailserver current time and that becomes start time of the query
+            # https://tools.ietf.org/html/rfc5032
+            interval = datetime.now(pytz.UTC) - since_ts.replace(tzinfo=pytz.UTC)
+            messages = server.search(['YOUNGER', "%d" % interval.total_seconds()])
+            #messages = server.sort(['REVERSE','DATE'],['SINCE', since_ts])
             i=0;
             step=10;
 

@@ -124,7 +124,7 @@ def insert_to_db(nwl,user):
     if dbnwl:
         dbnwl = dbnwl[0]
     else:
-        if is_publishing_platform(nwl['sender_email']):
+        if is_publishing_platform(nwl['sender_email_domain']):
             pub = Publisher.objects.filter(domain=nwl['sender_email'])
         elif is_umbrella_publisher(nwl['sender_email_domain']):
             pub = Publisher.objects.filter(domain=nwl['sender_email_domain'])

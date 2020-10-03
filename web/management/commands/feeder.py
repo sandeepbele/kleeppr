@@ -91,7 +91,7 @@ class Command(BaseCommand):
 
                 except Exception as e:
                     print(e)
-                    logger.error("Error in fetching or parsing messages for user: %s" % imap_user, e)
+                    logger.error("Error in fetching or parsing messages for user: %s : %s" , imap_user, str(e))
 
         except Exception as e:
             print(e)

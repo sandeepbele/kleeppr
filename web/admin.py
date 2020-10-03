@@ -84,10 +84,11 @@ class UserSubsAdmin(admin.ModelAdmin):
 
 class FeedAdmin(admin.ModelAdmin):
     list_display = ('user_id','nwl_id','ts','is_confirmation')
+    search_fields = ('user_id','nwl_id')
 
 
 class AppIdStoreAdmin(admin.ModelAdmin):
-    list_display = ['app_id','assigned']
+    list_display = ['app_id','app_id_secret','assigned']
     list_filter = ['assigned']
 
 
