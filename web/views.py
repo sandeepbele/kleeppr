@@ -192,7 +192,8 @@ def user_feed(request,nwl_id=None,filterConfirmation=False):
     context = { 'nwl':nwl, 'page_obj':page_obj, 'error':error }
     return render(request, "feed.html",context=context)
 
-
+@log_the_request
+@login_required
 def recent_feed(request):
     now = datetime.utcnow()
     two_wks_ago = now - timedelta(days=14)
@@ -338,6 +339,7 @@ def search_letters(request):
 
 
 @log_the_request
+@login_required
 def tour(request,welcome=False):
     return render(request,"tour.html",{'welcome':False })
 
