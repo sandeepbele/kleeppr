@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Standard Meta -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+
+  <!-- Site Properties -->
+  <title>Kleeppr for email newsletters</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+
+  <div class="ui container">
+    <div class="ui basic segment">
+      <div class="ui stackable secondary huge pointing menu">
+        <!--div class="ui container"-->
+        <div class="ui header item"> { Kleeppr } </div>
+
+        <!--a class="item">Features</a>
+        <a class="item">Testimonials</a>
+        <a class="item">Sign-in</a>
+
+        <div class="right menu">
+        <div class="ui simple dropdown item">
+        sandeep.bele@gmail.com
+        <i class="dropdown icon"> </i>
+        <div class="menu">
+        <a class="item" href="#"> Profile </a>
+        <a class="item" href="#"> Delete Account </a>
+        <a class="item" href="#"> Log Out </a>
+      </div>
+    </div>
+  </div-->
+  <div class="right menu">
+    <div class="ui item">
+      <div class="ui label">Already have an account?</div>
+
+    </div>
+    <div class="ui item">
+
+<!--div class="ui label">Already have an account?</div-->
+
+      <form id="login_user_form" action="{% url 'login' %}" method="post" name="login_user_form" class="needs-validation" novalidate>
+
+        {% csrf_token %}
+
+
+  <!--div class="ui inline form">
+    <div class="ui fields"-->
+
+        <div class="ui mini input ">
+
+          <input type="email" name="username" placeholder="Email">
+        </div>
+        <div class="ui mini input ">
+          <input type="password" name="password" placeholder="Password">
+        </div>
+         <input id="next" name="next" type="hidden" value="{{ next }}">
+
+        <button type="submit" class="ui small grey button" name="submit" value="Login">Sign In</button>
+      <!--/div>
+  </div-->
+
+  </form>
+
+    </div>
+
+    <!--div class="item">
+    <!--a href="mailto:hello@kleeppr.com" style="active:black">hello@kleeppr.com</a>
+    hello@kleeppr.com
+  </div--></div>
+</div>
+</div>
+
+<div class="ui basic center aligned stretched segment">
+  <!--h1 class="ui header">
+  Inbox for Email Newsletters
+</h1-->
+<!--div class="ui three column grid">
+<div class="column"><h1>Discover</h1></div>
+<div class="column"><h1>Subscribe</h1></div>
+<div class="column"><h1>Read</h1></div>
+</div>
+<h2>Email Newsletters</h2>
+<h3>from one app</h3-->
+
+<div class="ui huge header" style="font-size:34px">Your home for Email Newsletters</div>
+<h1>Discover | Subscribe | Read </h1>
+
+<div class="ui hidden divider"></div>
+<div class="ui hidden divider"></div>
+
+    <form action="{% url 'register' %}" method="POST" name="register_user_form" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+  <div class="ui inline form">
+    <div class="ui center aligned stackable grid">
+      <div class="ui row">
+        <div class="ui four wide column field">
+          <input type="email" name="username" placeholder="email:joe@blah.com">
+        </div>
+        <div class="ui four wide column ">
+          <input type="password" name="password1" placeholder="Password">
+        </div>
+         <div class="ui four wide column ">
+        <input type="password"  id="password2" name="password2" placeholder="Confirm Password" required>
+         </div>
+          <input name="next" type="hidden" value="{{ next }}">
+
+        <button type="submit" class="ui primary button" name="register" value="Register">Get Started!</button>
+      </div>
+    </div>
+  </div>
+
+  </form>
+
+<!--div class="ui primary button"> Sign in using Google Account</div-->
+<!--div class="g-signin" id="my-signin2" data-width="300" data-height="200" data-longtitle="true" data-text="asdas"></div-->
+<div class="ui hidden divider"></div>
+<div class="ui  divider"></div>
+<div class="ui hidden divider"></div>
+
+<div class="ui equal width center aligned grid">
+
+
+  <div class="ui  six wide left aligned column">
+
+    <p style="font-size:1.2em">Kleeppr is simple alternative to using your personal email for reading and managing newsletters.
+      When you sign up, Kleeppr creates unique email id that you can use to subscribe to mailing lists. Your personal email remains out of picture.</p>
+
+    </div>
+    <div class="ui six wide left aligned column">
+
+      <p style="font-size:1.2em">Explore curated list of 50+ and growing newsletters on various topics. Subscribe to your favorite ones
+      with just one click. Read latest issues in your feed or browse archive of past issues.</p>
+      </div>
+
+    </div>
+
+    <div class="ui hidden divider"></div>
+    <div class="ui hidden divider"></div>
+    <div class="ui hidden divider"></div>
+    <div class="ui hidden divider"></div>
+
+
+    <div class="ui horizontal list">
+
+      <div class="item">
+        <i class="ui browser huge icon" aria-hidden="true"></i>
+        <div class="row"></div>
+        <div class="ui label">Explore 70+ curated newsletters</div>
+      </div>
+     <div class="item">
+        <i class="ui add huge icon" aria-hidden="true"></i>
+        <div class="row"></div>
+        <div class="ui label">One click subscribe/unsubscribe</div>
+      </div>
+
+      <div class="item">
+        <i class="ui tablet huge icon" aria-hidden="true"></i>
+        <div class="row"></div>
+        <div class="ui label">Read within app</div>
+      </div>
+
+      <div class="item">
+        <i class="ui privacy huge icon" aria-hidden="true"></i>
+        <div class="row"></div>
+        <div class="ui label">Never share your email</div>
+      </div>
+
+    </div>
+
+  </div>
+
+      <div class="ui divider"/>
+    <div class="ui footer basic segment">
+ <div class="ui container">
+
+      <div class="ui stackable equal height stackable grid">
+        <div class="ui center aligned column">hello@kleeppr.com</div>
+        </div>
+ </div>
+ </div>
+  </div>
+
+
+</body>
+
+
+

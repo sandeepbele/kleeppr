@@ -4,17 +4,33 @@
 
 {% block page_content %}
 
-<div class="container">
-    <div class="card mt-2">
 
-        <div class="card-body">
-    <h5 class="card-title">Bookmarklet</h5>
-    <p class="card-text">This bookmarklet quickly fills in Kleeppr email id in newsletter subscription form. To use, first click on email field on
-subscription form and then click on bookmarklet.</p>
-<p>
-Drag and drop <a class="btn btn-primary btn-sm"
-                 href="javascript:(function()%7Bvar%20e%20%3D%20document.activeElement%3Be.value%20%3D%20%22{{ appid }}%40kleeppr.com%22%7D)()">
-        Kleeppr Bookmarklet</a> on browser's bookmark bar to install it.</p>
-</div>
+<div class="container">
+    <div class="row">
+
+        <div class="col-md-2 mt-3">
+        </div>
+        <div class="col col-md-10 mt-2">
+            <div class="card border-0 mt-2">
+
+                <div class="card-body">
+                    <p> Username: {{ request.user }} </p>
+                    <p id="appid">Your Kleeppr ID: <strong class="appid"><em>{{ request.session.appid }}@private.kleepprid.com</em></strong>
+                        <button data-toggle="tooltip" data-placement="right" title="Copy to Clipboard"
+                                onClick="copyToClipboard(document.querySelector('.appid').innerText);showAlert('Your Kleeppr ID is copied to clipboard.','appid');">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </p>
+
+                    <p class="card-text">
+                        Drag and drop this <a class="btn btn-primary btn-sm" style="color:white" data-toggle="tooltip" data-placement="top" title="Drag to Install Bookmark"
+                                              href="javascript:(function()%7Bvar%20e%20%3D%20document.activeElement%3Be.value%20%3D%20%22{{ appid }}%40private.kleepprid.com%22%7D)()">
+                        Kleeppr Bookmarklet</a> on browser's bookmark bar to install it.</p>
+                    <p class="card-text">Bookmarklet can quickly fill in Kleeppr ID in newsletter subscription
+                        form. When you are on subscription page, just click on email field and then click on bookmarklet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

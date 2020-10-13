@@ -1,199 +1,219 @@
-<!DOCTYPE html>
-<html>
 
-<head>
-  <!-- Standard Meta -->
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+{% extends "base.html" %}
 
-  <!-- Site Properties -->
-  <title>Kleeppr for email newsletters</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-  <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
-</head>
 
+{% block custom_js_inhead %}
+{% load static %}
+  <!-- Custom fonts for this template -->
+  <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/simple-line-icons/css/simple-line-icons.css' %}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <!-- Custom styles for this template -->
+  <link href="{% static 'css/landing-page.css' %}" rel="stylesheet">
+
+{% endblock %}
+
+
+{% block content %}
 <body>
 
-
-  <div class="ui container">
-    <div class="ui basic segment">
-      <div class="ui stackable secondary huge pointing menu">
-        <!--div class="ui container"-->
-        <div class="ui header item"> { Kleeppr } </div>
-
-        <!--a class="item">Features</a>
-        <a class="item">Testimonials</a>
-        <a class="item">Sign-in</a>
-
-        <div class="right menu">
-        <div class="ui simple dropdown item">
-        sandeep.bele@gmail.com
-        <i class="dropdown icon"> </i>
-        <div class="menu">
-        <a class="item" href="#"> Profile </a>
-        <a class="item" href="#"> Delete Account </a>
-        <a class="item" href="#"> Log Out </a>
-      </div>
+  <!-- Navigation -->
+  <nav class="navbar navbar-light bg-light static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#"><strong>{ Kleeppr }</strong></a>
+      <a class="btn btn-primary" href="{% url 'login' %}">Sign In</a>
     </div>
-  </div-->
-  <div class="right menu">
-    <div class="ui item">
-      <div class="ui label">Already have an account?</div>
+  </nav>
 
-    </div>
-    <div class="ui item">
-
-<!--div class="ui label">Already have an account?</div-->
-
-      <form id="login_user_form" action="{% url 'login' %}" method="post" name="login_user_form" class="needs-validation" novalidate>
-
-        {% csrf_token %}
+  <!-- Masthead -->
+  <header class="masthead text-white text-center">
 
 
-  <!--div class="ui inline form">
-    <div class="ui fields"-->
-
-        <div class="ui mini input ">
-
-          <input type="email" name="username" placeholder="Email">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <h1 class="mb-5 display-1" style="font-size:4rem">let us handle your <e style="color:#da2d2d">newsletters</e></h1>
+          <!--h2 class="mb-5">email subscription = <del>personal email</del> KleepprID</h2-->
+          <h5 class="mb-5">keep your personal email <e style="color:#da2d2d">private</e> and inbox <e style="color:#da2d2d">clutter-free</e></h5>
         </div>
-        <div class="ui mini input ">
-          <input type="password" name="password" placeholder="Password">
+
+        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+          <form method="POST" action="{% url 'register_from_landing' %}">
+            <div class="form-row">
+              <div class="col-12 col-md-9 mb-2 mb-md-0">
+                <input type="email" name="email" class="form-control form-control-md" placeholder="Your Email Address">
+              </div>
+              {% csrf_token %}
+              <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-block btn-md btn-primary">Get Started!</button>
+              </div>
+            </div>
+          </form>
         </div>
-         <input id="next" name="next" type="hidden" value="{{ next }}">
-
-        <button type="submit" class="ui small grey button" name="submit" value="Login">Sign In</button>
-      <!--/div>
-  </div-->
-
-  </form>
-
+      </div>
     </div>
+  </header>
 
-    <!--div class="item">
-    <!--a href="mailto:hello@kleeppr.com" style="active:black">hello@kleeppr.com</a>
-    hello@kleeppr.com
-  </div--></div>
-</div>
-</div>
-
-<div class="ui basic center aligned stretched segment">
-  <!--h1 class="ui header">
-  Inbox for Email Newsletters
-</h1-->
-<!--div class="ui three column grid">
-<div class="column"><h1>Discover</h1></div>
-<div class="column"><h1>Subscribe</h1></div>
-<div class="column"><h1>Read</h1></div>
-</div>
-<h2>Email Newsletters</h2>
-<h3>from one app</h3-->
-
-<div class="ui huge header" style="font-size:34px">Your home for Email Newsletters</div>
-<h1>Discover | Subscribe | Read </h1>
-
-<div class="ui hidden divider"></div>
-<div class="ui hidden divider"></div>
-
-    <form action="{% url 'register' %}" method="POST" name="register_user_form" class="needs-validation" novalidate>
-    {% csrf_token %}
-
-  <div class="ui inline form">
-    <div class="ui center aligned stackable grid">
-      <div class="ui row">
-        <div class="ui four wide column field">
-          <input type="email" name="username" placeholder="email:joe@blah.com">
+  <!-- Icons Grid -->
+  <section class="features-icons bg-light text-center">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+            <div class="features-icons-icon d-flex">
+              <i class="icon-check m-auto text-primary"></i>
+            </div>
+            <h3>Subscribe Privately</h3>
+            <p class="lead mb-0">Subscribe to mailing lists with Kleeppr ID.</p>
+          </div>
         </div>
-        <div class="ui four wide column ">
-          <input type="password" name="password1" placeholder="Password">
+        <div class="col-lg-4">
+          <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+            <div class="features-icons-icon d-flex">
+              <i class="icon-layers m-auto text-primary"></i>
+            </div>
+            <h3>Discover </h3>
+            <p class="lead mb-0">Find interesting newsletters to follow.</p>
+          </div>
         </div>
-         <div class="ui four wide column ">
-        <input type="password"  id="password2" name="password2" placeholder="Confirm Password" required>
-         </div>
-          <input name="next" type="hidden" value="{{ next }}">
-
-        <button type="submit" class="ui primary button" name="register" value="Register">Get Started!</button>
-      </div>
-    </div>
-  </div>
-
-  </form>
-
-<!--div class="ui primary button"> Sign in using Google Account</div-->
-<!--div class="g-signin" id="my-signin2" data-width="300" data-height="200" data-longtitle="true" data-text="asdas"></div-->
-<div class="ui hidden divider"></div>
-<div class="ui  divider"></div>
-<div class="ui hidden divider"></div>
-
-<div class="ui equal width center aligned grid">
-
-
-  <div class="ui  six wide left aligned column">
-
-    <p style="font-size:1.2em">Kleeppr is simple alternative to using your personal email for reading and managing newsletters.
-      When you sign up, Kleeppr creates unique email id that you can use to subscribe to mailing lists. Your personal email remains out of picture.</p>
-
-    </div>
-    <div class="ui six wide left aligned column">
-
-      <p style="font-size:1.2em">Explore curated list of 50+ and growing newsletters on various topics. Subscribe to your favorite ones
-      with just one click. Read latest issues in your feed or browse archive of past issues.</p>
-      </div>
-
-    </div>
-
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
-
-
-    <div class="ui horizontal list">
-
-      <div class="item">
-        <i class="ui browser huge icon" aria-hidden="true"></i>
-        <div class="row"></div>
-        <div class="ui label">Explore 70+ curated newsletters</div>
-      </div>
-     <div class="item">
-        <i class="ui add huge icon" aria-hidden="true"></i>
-        <div class="row"></div>
-        <div class="ui label">One click subscribe/unsubscribe</div>
-      </div>
-
-      <div class="item">
-        <i class="ui tablet huge icon" aria-hidden="true"></i>
-        <div class="row"></div>
-        <div class="ui label">Read within app</div>
-      </div>
-
-      <div class="item">
-        <i class="ui privacy huge icon" aria-hidden="true"></i>
-        <div class="row"></div>
-        <div class="ui label">Never share your email</div>
-      </div>
-
-    </div>
-
-  </div>
-
-      <div class="ui divider"/>
-    <div class="ui footer basic segment">
- <div class="ui container">
-
-      <div class="ui stackable equal height stackable grid">
-        <div class="ui center aligned column">hello@kleeppr.com</div>
+        <div class="col-lg-4">
+          <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+            <div class="features-icons-icon d-flex">
+              <i class="icon-emotsmile m-auto text-primary"></i>
+            </div>
+            <h3>Inbox+</h3>
+            <p class="lead mb-0">Inbox with superpowers so that you can focus on reading </p>
+          </div>
         </div>
- </div>
- </div>
-  </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Image Showcases -->
+  <section class="showcase">
+    <div class="container-fluid p-0">
+      <div class="row no-gutters">
+
+        <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url({% static 'img/cyber-security-3194286_1920.jpg' %}) ;"></div>
+        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+          <h2>Private Subscription</h2>
+          <p class="lead mb-0"> We make subscribing to any kind of newsletter, product updates or even deals & discount notifications, better and private. Instead of your personal or work
+            email, you use KleepprID to subscribe to email newsletters. Your email stays private.</p></div>
+      </div>
+      <div class="row no-gutters">
+        <div class="col-lg-6 text-white showcase-img" style="background-image: url({% static 'img/books-768426_1920.jpg' %});"></div>
+        <div class="col-lg-6 my-auto showcase-text">
+          <h2>Find New Newsletters</h2>
+          <p class="lead mb-0">We have curated hundreds of newsletters from all over the internet for you. Politics, News, Science, Sports, Culture - you name the genre.
+            Explore them by authors, name or categories at one place. </p>
+        </div>
+      </div>
+      <div class="row no-gutters">
+        <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url({% static 'img/letterbox-211428_1920.jpg' %});"></div>
+        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+          <h2>Inbox+</h2>
+          <p class="lead mb-0">We know your newsletters better than anyone. Your feed stays organised so that daily newsletters do not bury
+            weekly ones. Filter reading list by genre or publisher. Manage your subscriptions at one place. We take care of all messy part so that you
+            can focus on reading.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials text-center bg-light">
+    <div class="container">
+      <h2 class="mb-5">What people are saying...</h2>
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+            <!--img class="img-fluid rounded-circle mb-3" src="img/testimonials-1.jpg" alt=""-->
+            <h5>Jessica E.</h5>
+            <p class="font-weight-light mb-0">"This is fantastic! I love to read newsletters and discovering cool ones to follow had never been so easy, thanks to Kleeppr!"</p>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+            <!--img class="img-fluid rounded-circle mb-3" src="img/testimonials-2.jpg" alt=""-->
+            <h5>Karthik G.</h5>
+            <p class="font-weight-light mb-0">"Kleeppr is awesome! I can now freely subscribe to newsletters without worrying about my email address being sold or tracked."</p>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+            <!--img class="img-fluid rounded-circle mb-3" src="img/testimonials-3.jpg" alt=""-->
+            <h5>Alexis R.</h5>
+            <p class="font-weight-light mb-0">"I have moved all my newsletter subscriptions to Kleeppr. I am reading more and my personal inbox was never so tidy."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="call-to-action text-white text-center">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <h2 class="mb-4">Ready to get started? Sign up now!</h2>
+        </div>
+        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+           <form method="POST" action="{% url 'register_from_landing' %}">
+            <div class="form-row">
+              <div class="col-12 col-md-9 mb-2 mb-md-0">
+                <input type="email" name="email" class="form-control form-control-md" placeholder="Enter your email...">
+              </div>
+              {% csrf_token %}
+              <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-block btn-md btn-primary">Sign up!</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+   <section class="showcase">
+    <div class="container-fluid p-0">
+      <div class="row no-gutters">
+
+        <!--div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url({% static 'img/cyber-security-3194286_1920.jpg' %}) ;"></div-->
+        <div class="col order-lg-1 my-auto showcase-text">
+          <h3>About Us</h3>
+          <p class="lead mb-0">
+            At Kleeppr, we are commited to bring better newsletter subscription experience to users.
+            While newsletters have become de-facto notification service of the web, traditional emails clients have failed to keep up
+            with volume and associated management challenges. Kleeppr solves these challenges by providing privacy first, all in one platform to discover, subscribe and read email newsletters.
+            We are a startup based in Silicon Valley.
+          </p>
+          <p class="lead mt-2 mb-0">
+            If you love newsletters as we do or you publish one, we would love to chat with you.
+          </p>
+          <p class="lead mt-2 mb-0">
+            We work with corporates to bring newsletters to their employees through our platform. We protect work email
+            and provide central management of subscriptions across organization. Contact us for more info.
+          </p>
+
+           <h4 class="mt-3 mb-0">
+           Email: hello@kleeppr.com
+           </h4>
+
+        </div>
+      </div>
 
 
-</body>
+            <div class="footer">
+              <nav class="navbar navbar-light bg-light d-flex text-center">
+                <span class="navbar-text flex-grow-1">
+                    <small>&#169;&nbsp;2020&nbsp;kleeppr.com, All Rights Reserved.</small>
+                </span>
+                <span class="navbar-text mr-3">
+                    <small>hello@kleeppr.com</small>
+                </span>
+              </nav>
+            </div>
 
-
-
+  {% endblock %}

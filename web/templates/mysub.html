@@ -78,11 +78,13 @@
 
                                 <p class="card-text small text-muted">{{ card.nwl_id.get_tags }} | {{ card.nwl_id.get_frequency }}</p>
 
-                                <a href="{% url 'nwl_feed' nwl_id=card.nwl_id.id %}" class="link">Show Letters</a>
+                                <a href="{% url 'nwl_feed' nwl_id=card.nwl_id.id %}"  class="btn btn-sm btn-outline-primary">Show Letters</a>
 
 
-                                <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-primary ml-1">Unsubscribe</a>
-                                  {% if card.unsub_url != "" %}
+                                {% if card.unsub_url and card.unsub_url != "" and card.unsub_url != "unknown" %}
+                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1" >Unsubscribe</a>
+                                {% else %}
+                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1 disabled">Unsubscribe</a>
                                 {% endif %}
 
 

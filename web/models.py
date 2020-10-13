@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from utils import MailUtils
 
 
 class Tags(models.Model):
@@ -70,9 +71,15 @@ class Feed(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     message_id = models.TextField(null=True)
-    ts = models.DateTimeField(default=datetime.now,null=True)
+    ts = models.DateTimeField(default=datetime.utcnow,null=True)
     nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
     is_confirmation = models.BooleanField(default=False)
+    subject = models.TextField(null=True)
+    intro = models.TextField(null=True)
+    has_been_read= models.BooleanField(default=False)
+
+    def get_x_time_ago(self):
+        return MailUtils.get_x_time_ago(self.ts.strftime("%a, %d %b %Y %X %z"))
 
 
 class UserSettings(models.Model):
@@ -91,6 +98,7 @@ class UserSubs(models.Model):
     nwl_id = models.ForeignKey(Newsletters, on_delete=models.CASCADE)
     unsub_url = models.TextField(null=True)
     feed_count = models.IntegerField(default=0)
+    sub_ts= models.DateTimeField(auto_now_add=True, null=True)
 
     def has_confirmation_email(self):
          f = Feed.objects.filter(user_id=self.user_id).filter(nwl_id=self.nwl_id).\

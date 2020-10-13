@@ -23,33 +23,32 @@
 
                         <!-- put everything that goes inside hamberger menu inside "collapse navbar-collapse" class -->
                         <div class="collapse navbar-collapse pl-2" id="klpMenu">
-
+                        {% with request.resolver_match.url_name as url_name %}
                             <ul class="navbar-nav">
                                 <!-- nav-link text below is right justified in style.css for hanmberger menu -->
 
-                                    <a class="nav-link {% if request.path == 'feed' %} active {% endif %} " href="{% url 'feed' %}">Feed</a>
-                                    <a class="nav-link {% if request.path == 'mysub' %} active {% endif %} " href="{% url 'mysub' %}">Subscriptions</a>
-                                    <a class="nav-link {% if request.path == 'confirmsub' %} active {% endif %} " href="{% url 'confirmsub' %}">Pending Confirmations</a>
-                                    <a class="nav-link {% if request.path == 'explore' %} active {% endif %}" href="{% url 'explore' %}">Explore</a>
+                                    <a class="nav-link {% if url_name == 'feed' or url_name == 'recent' %} active {% endif %}" href="{% url 'recent' %}">Feed</a>
+                                    <a class="nav-link {% if url_name == 'mysub' %} active {% endif %} " href="{% url 'mysub' %}" >Subscriptions</a>
+                                    <a class="nav-link {% if url_name == 'confirmsub' %} active {% endif %} " href="{% url 'confirmsub' %}">Pending Confirmations</a>
+                                    <a class="nav-link {% if url_name == 'explore' %} active {% endif %}" href="{% url 'explore' %}">Explore</a>
 
-                                {% comment %}
-                                    <a class="nav-link {%- if request.path == '/mailbox/confirm' %} active {% endif %} " href="{{ url_for('mailbox.confirm_sub') }}">Pending Confirmations</a>
-                                    <a class="nav-link {%- if request.path == '/explore' %} active {% endif %}" href="{{ url_for('website.explore') }}">Explore</a>
-                                {% endcomment %}
                             </ul>
 
                             <ul class="navbar-nav ml-md-auto pl-5">
-                                 <a class="nav-link" href="{% url 'tour' %}">Tour</a>
+                                 <a class="nav-link {% if url_name == 'tour' %} active {% endif %}" href="{% url 'tour' %}">Tour</a>
                                 {% if request.session.appid %}
-                                    <a tabindex="0" class="nav-link" role="button" data-toggle="popover" data-placement="bottom"
+                                    <!--a tabindex="0" class="nav-link" role="button" data-toggle="popover" data-placement="bottom"
                                        title="Your Kleeppr Email"
                                        data-content="{{ request.session.appid }}@private.kleepprid.com">
                                         Email
                                     </a>
-                                    <a class="nav-link" href="/bookmark">Bookmarklet</a>
+                                    <a class="nav-link {% if url_name == 'bookmark' %} active {% endif %}" href="/bookmark">Bookmarklet</a-->
+                                 <a class="nav-link {% if url_name == 'bookmark' %} active {% endif %}" href="/bookmark">Kleeppr ID</a>
+
                                 {% endif %}
                                 <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>
                             </ul>
+                            {% endwith %}
 
                         {% else %}
                              <!-- ml-lg-auto: margin left set to auto for large screen thats shifts to this item to right -->

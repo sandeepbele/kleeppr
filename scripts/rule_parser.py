@@ -91,6 +91,8 @@ def process_rule(nwl):
 
     email = nwl['sender_email']
     email_domain = email[email.index('@')+1:]
+    letter_name = author_name = None
+
     if email_domain in domain_rules_mapping:
         for (letter_rule,author_rule) in domain_rules_mapping[email_domain]:
 

@@ -3,19 +3,68 @@
 {% include 'navbar.html' %}
 
 {% block page_content %}
-<div class="container-fluid">
+<div class="container">
     <div class="row">
-        <div class="col d-flex justify-content-center">
-    <div class="card w-75 mt-5">
-        <div class="card-header">
-             <p>Welcome. Take a quick tour of our features.</p>
-  </div>
-      <div class="card-body">
-         {% load static %}
-  <img class="embed-responsive-item w-100" src="{% static 'web/recording.gif' %}" allowfullscreen></img>
-
-      </div>
+        <div class="col-md-2 mt-3">
         </div>
+        <div class="col mt-3">
+
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item h1">Welcome To Kleeppr <i class="fa fa-heart" style="font-size:36px;color:red"></i></li>
+                <li class="list-group-item">1. Install <a href="{% url 'bookmark' %}">Bookmarklet</a></li>
+                <li class="list-group-item">2. Start <a href="{% url 'explore' %}">exploring</a> interesting newsletters</li>
+                <li class="list-group-item">3. Use <a href="{% url 'bookmark' %}">Bookmarklet</a> or copy-paste your <a href="{% url 'bookmark' %}">Kleeppr ID</a> to subscribe to newsletters</li>
+                <li class="list-group-item">4. Come back and check <a href="{% url 'confirmsub' %}">Pending confirmations</a></li>
+                <li class="list-group-item">5. Check your <a href="{% url 'recent' %}">Feed</a></li>
+
+                <li class="list-group-item">>> Take this 60 sec
+                    <a class="btn2 btn-primary2" data-toggle="collapse" href="#tour" role="button"
+                       aria-expanded="false" aria-controls="tour">
+                        Product Tour
+                    </a>
+                    <div class="collapse show" id="tour">
+                        <div class="card-header mt-3">
+                            <p>Welcome. Take a quick tour of our features.</p>
+                        </div>
+                        <div class="card-body">
+                            {% load static %}
+                            <img class="embed-responsive-item w-100" src="{% static 'web/recording.gif' %}"
+                                 allowfullscreen></img>
+
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">>> FAQ is
+                    <a class="btn2 btn-primary2" data-toggle="collapse" href="#faq" role="button"
+                       aria-expanded="false" aria-controls="faq">
+                        here
+                    </a>
+                 <div class="collapse" id="faq">
+                     <ul class="list-group list-group-flush">
+                         <li class="list-group-item">
+                             <p><strong>I subscribed to a newsletter but don't see anything in feed? </strong></p>
+                             <p>Make sure to check Pending Confirmation tab for any confirmation email.Many newsletters need user to confirm subscription first.
+                             Each newsletter has its frequency, daily or on certain day of a week etc. Please wait. If you still do not see your newsletter issue
+                                 reach out to us.
+                             </p>
+                         </li>
+                         <li class="list-group-item">
+                             <p><strong> Can I subscribe to a newsletter that is not in your list?</strong></p>
+                             <p> Yes absolutely! This is how our list grows too.
+                             </p>
+                         </li>
+                         <li class="list-group-item">
+                             <p><strong>What is your bookmarklet?</strong></p>
+                             <p> Its a very simple javascript code that fills in your Kleeppr ID in email field of subscription form.
+                                 It's one line javascript code, does not depend on any external script, does not collect any data.
+                             </p>
+                         </li>
+                     </ul>
+                 </div>
+                </li>
+                <li class="list-group-item">>> We are available at: hello@kleeppr.com</li>
+
+                </ul>
         </div>
     </div>
 </div>

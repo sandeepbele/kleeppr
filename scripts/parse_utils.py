@@ -8,7 +8,7 @@ import pytz
 from web.models import UserSettings,Feed,Newsletters,UserSubs,User,Publisher
 from .rule_parser import process_rule, is_umbrella_publisher, is_publishing_platform
 from bs4 import BeautifulSoup
-
+from utils import MailUtils
 
 def parse_message_v2(uid,email_message):
 
@@ -98,6 +98,28 @@ def parse_message_v2(uid,email_message):
 
     nwl['possible_confirmation_email'] = is_confirmation
 
+    txt_nodes = soup.find_all('p')
+    txt = ""
+    for txt_node in txt_nodes:
+        txt += " " + txt_node.get_text().strip()
+        if len(txt) > 600:
+            break;
+
+    if not txt:
+        txt_nodes = soup.body.find_all(MailUtils.find_node_that_has_text)
+        for txt_node in txt_nodes:
+            txt += " " + txt_node.get_text().strip()
+            if len(txt) > 600:
+                break;
+
+    if not txt:
+        txt = soup.body.get_text()
+
+    # print("-------------")
+    # print(txt[:600])
+    # print(txt)
+
+    nwl['snippet'] = txt[:600]
     return nwl
 
 
@@ -156,16 +178,19 @@ def insert_to_db(nwl,user):
     else:
         usersub = usersub[0]
 
-    f = Feed.objects.filter(user_id=user.user_id, message_id=nwl['id'])
+    f = Feed.objects.filter(user_id=user.user_id, message_id=nwl['id']).first()
 
     # if feed row is present then update newsletter associated with it else create new row
     if f:
-        f = f[0]
         if f.nwl_id != dbnwl:
             print("#updated feed row#",f.id," nwl_id from:",f.nwl_id," to:",dbnwl)
             f.nwl_id = dbnwl
             f.save()
             print("#check update:#",f.id," new nwl_id:",f.nwl_id)
+
+        if f.intro is None:
+            f.subject = nwl['m_subject']
+            f.intro = nwl['snippet']
 
     else:
         is_confirmation_email = False
@@ -174,7 +199,8 @@ def insert_to_db(nwl,user):
 
         f = Feed.objects.create(user_id=user.user_id, message_id=nwl['id'], ts=nwl['ts'],
                                 nwl_id=dbnwl,
-                                is_confirmation=is_confirmation_email)
+                                is_confirmation=is_confirmation_email, subject=nwl['m_subject'],
+                                intro=nwl['snippet'])
         f.save()
 
         usersub.feed_count += 1

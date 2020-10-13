@@ -27,14 +27,14 @@
                         <button type="button" class="btn btn-sm btn-dark" onclick="javascript:history.back()">Back</button>
                     </li>
                     <li class="list-group-item text-center">
-                        <div class="small"> {{ ts }} | by {{ author }} </div>
+                        <div class="small"> {{ ts }} | {{ letter | title }} by {{ author }} </div>
                         <div class="pt-2">{{ title }}</div>
                     </li>
                 </ul>
 
                 <div class="container-fluid mt-3 mb-3">
 
-                    <iframe id="letter"
+                    <iframe id="letter" target="_blank"
                 title="letter content"
                 style="overflow:hidden;
          display:block; position: relative; height: 100vh; width: 100%; border:none"

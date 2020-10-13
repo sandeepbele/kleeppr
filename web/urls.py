@@ -13,6 +13,7 @@ urlpatterns = [
     path('indus/', include('django.contrib.auth.urls')),
     path('indus/password_reset/', log_the_request(auth_views.PasswordResetView.as_view()), name='password_reset'),
     path('indus/reset/<uidb64>/<token>/', log_the_request(auth_views.PasswordResetConfirmView.as_view()), name='password_reset_confirm'),
+    path('register_from_landing',views.register_from_landing,name='register_from_landing'),
     path('indus/register',views.register_user,name='register'),
     path('indus/register/<follow>',log_the_request(views.register_user),name='register_follow'),
 
@@ -28,5 +29,11 @@ urlpatterns = [
     path('follow/<int:next>',views.follow,name='follow'),
     path('search',views.search_letters,name="search_explore"),
     path('tour',views.tour,name='tour'),
+    path('welcome',views.tour,{'welcome':True},name='welcome'),
+    path('recent', views.recent_feed,name='recent'),
+    path('privacy', views.terms,{ 'show':'pp'} ,name='privacy'),
+    path('cookie', views.terms,{ 'show':'ck'} ,name='cookie'),
+    path('terms', views.terms,{ 'show':'tc'} ,name='terms'),
+
     #re_path(r'^favicon\.ico$', favicon_view),
 ]

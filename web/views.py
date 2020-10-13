@@ -19,7 +19,7 @@ from pprint import pprint
 import re
 from bs4 import BeautifulSoup
 from utils import MailUtils
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import logging
 import threading
@@ -28,6 +28,7 @@ from django.http import Http404
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
 
+from django.urls import resolve,reverse
 
 def log_the_request(view_func):
     def log_decorator(request,*args, **kwargs):
@@ -100,6 +101,15 @@ def index(request):
 
 
 @log_the_request
+def register_from_landing(request):
+    email = None
+    if request.method == 'POST':
+        email = request.POST['email']
+
+    return render(request,'web/register_user.html', {'email':email})
+
+
+@log_the_request
 def register_user(request):
 
     form = UserCreationForm()
@@ -166,118 +176,57 @@ def user_feed(request,nwl_id=None,filterConfirmation=False):
 
     if nwl_id:
         feed = feed.filter(nwl_id = nwl_id)
-        nwl = Newsletters.objects.filter(id = nwl_id)
-        if nwl:
-            nwl = nwl[0]
-        else:
+        nwl = Newsletters.objects.filter(id = nwl_id).first()
+        if not nwl:
             error = "[1023] Sorry. Its strange but couldn't find newsletter in our records. This must be an error. "
     else:
         feed = feed.filter(is_confirmation=filterConfirmation)
 
-    paginator = Paginator(feed, per_page=25)
+    paginator = Paginator(feed, per_page=10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    app_id_record = AppIdStore.objects.filter(app_id=request.session['appid']).first()
-    if not app_id_record:
-        log("app_id record not found for %s" % request.session['appid'], logging.ERROR)
-        raise Http404("Something weired has happened. We can't serve your request. Please try again")
+    #match = resolve('/list/58')
+    #print(match.url_name)
 
-    imap_user = app_id_record.app_id
-    imap_secret = app_id_record.app_id_secret
+    context = { 'nwl':nwl, 'page_obj':page_obj, 'error':error }
+    return render(request, "feed.html",context=context)
 
-    mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
 
-    mails = []
-    #mbox = Imapbox(settings.IMAP_HOST,settings.IMAP_USER, settings.IMAP_PASSWORD)
+def recent_feed(request):
+    now = datetime.utcnow()
+    two_wks_ago = now - timedelta(days=14)
 
-    for record in page_obj.object_list:
+    feed = Feed.objects.filter(user_id=request.user.id).filter(ts__range=(two_wks_ago,now)).distinct('nwl_id')
+    m = []
+    for f in feed:
+        x = Feed.objects.filter(user_id=request.user.id).filter(nwl_id=f.nwl_id).filter(ts__range=(two_wks_ago,now)).order_by('-ts','nwl_id__frequency')[0]
+        m.append(x)
 
-        msg = mbox.get_message_by_id(record.message_id)
+    paginator = Paginator(m, per_page=10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-        mail = dict()
-        mail['message_id'] = record.message_id
-        mail['subject'] = msg.get('Subject')
-
-        frm = msg.get('From')
-        frm = re.sub('<.*>', '', frm)
-        mail['from'] = frm.strip()
-        '''body = ""
-        for part in msg.walk():
-            if part.get_content_type() == 'text/html':
-                body += part.as_string()
-        #print(msg.get_body().get_content())
-        print(body)'''
-        body = msg.get_body().get_content()
-        soup = BeautifulSoup(body, 'html.parser')
-        txt_nodes = soup.find_all('p')
-        txt = ""
-        for txt_node in txt_nodes:
-            txt += " " + txt_node.get_text().strip()
-            if len(txt) > 600:
-                break;
-
-        if not txt:
-            txt_nodes = soup.body.find_all(MailUtils.find_node_that_has_text)
-            for txt_node in txt_nodes:
-                txt += " " + txt_node.get_text().strip()
-                if len(txt) > 600:
-                    break;
-
-        if not txt:
-            txt = soup.body.get_text()
-
-        #print("-------------")
-        #print(txt[:600])
-        # print(txt)
-
-        mail['snippet'] = txt[:600]
-        mail['x_time_ago'] = MailUtils.get_x_time_ago(msg)
-
-        if nwl_id:
-            mail['tags'] = record.nwl_id.get_tags()
-
-        mails.append(mail)
-
-    context = { 'mails':mails, 'nwl':nwl, 'page_obj':page_obj, 'error':error }
+    context = {'page_obj': page_obj }
     return render(request, "feed.html", context)
-
 
 @log_the_request
 @login_required
 def get_letter(request, message_id):
 
-    app_id_record = AppIdStore.objects.filter(app_id=request.session['appid']).first()
-    if not app_id_record:
-        log("app_id record not found for %s" % request.session['appid'],logging.ERROR)
+    feed_rec = Feed.objects.filter(user_id=request.user.id).filter(message_id=message_id).first()
+    if not feed_rec:
+        log("feed record not found for user:%s, message_id:%s" % (request.user,message_id), logging.ERROR)
         raise Http404("Something weired has happened. We can't serve your request. Please try again")
 
-    imap_user = app_id_record.app_id
-    imap_secret = app_id_record.app_id_secret
-
-    mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
-    email = mbox.get_message_by_id(message_id)
-
-    title = email.get('Subject')
-
-    frm = email.get('From')
-    re.sub('<.*>', '', frm)
-    author = frm.strip()
-
-    ts = email.get('Date')
-
-    # Fri, 01 Feb 2019 02:07:22 +0000 (UTC)
-    # Fri,  8 Mar 2019 23:06:46 +0000
-
-    ts = re.sub("\([A-Z]{3}\)", "", ts)
-    ts = ts.strip()
-
-    mailts = datetime.strptime(ts, "%a, %d %b %Y %H:%M:%S %z")
-    mailts = mailts.astimezone(pytz.utc)
+    mailts = feed_rec.ts.astimezone(pytz.utc)
     mailts = mailts.strftime("%a, %d %b %H:%M:%S")
     mailts = "%s UTC" % mailts
 
-    context = { 'ts':mailts, 'message_id':message_id, 'title':title, 'author':author }
+    feed_rec.has_been_read = True
+    feed_rec.save()
+
+    context = { 'ts':mailts, 'message_id':message_id, 'title':feed_rec.subject, 'letter':feed_rec.nwl_id.letter, 'author':feed_rec.nwl_id.author }
     return render(request, 'letter.html',context)
 
 
@@ -297,7 +246,13 @@ def get_letter_content(request,message_id):
     mbox = Imapbox(settings.IMAP_HOST, imap_user, imap_secret)
     email = mbox.get_message_by_id(message_id)
     #print(email.get_body())
-    return HttpResponse(email.get_body().get_content())
+
+    #
+    soup = BeautifulSoup(email.get_body().get_content(), 'html.parser')
+    for href in soup.find_all('a'):
+        href['target'] = '_blank'
+
+    return HttpResponse(str(soup))
 
 
 @log_the_request
@@ -383,5 +338,14 @@ def search_letters(request):
 
 
 @log_the_request
-def tour(request):
-    return render(request,"tour.html")
+def tour(request,welcome=False):
+    return render(request,"tour.html",{'welcome':False })
+
+
+def terms(request,show='tc'):
+    if show == 'pp':
+        return render(request,"privacy-policy.html")
+    elif show == 'tc':
+        return render(request, "terms-and-conditions.html")
+    elif show == 'ck':
+        return render(request, "cookie-policy.html")

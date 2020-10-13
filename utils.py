@@ -3,6 +3,27 @@ from datetime import datetime, timezone
 from bs4 import NavigableString, Tag
 import io
 
+
+def send_welcome_email():
+    subject = 'Welcome to MyApp!'
+    from_email = 'no-reply@myapp.com'
+    to = instance.email
+    plaintext = get_template('email/welcome.txt')
+    html = get_template('email/welcome.html')
+
+    d = Context({'username': instance.username})
+
+    text_content = plaintext.render(d)
+    html_content = html.render(d)
+
+    try:
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+    except BadHeaderError:
+        return HttpResponse('Invalid header found.')
+
+
 class StdoutToLogger(object):
     def __init__(self,_logger):
         self.terminal = sys.stdout
@@ -30,14 +51,14 @@ class MailUtils:
         pass
 
     @staticmethod
-    def get_x_time_ago(message):
+    def get_x_time_ago(message_date):
 
-        date = message.get('Date')
+        #date = message.get('Date')
         # Sun, 24 Feb 2019 18:53:01 +0000 (UTC)
         # fmt = "%a, %d %b %Y %X %z (%Z)"
         fmt = "%a, %d %b %Y %X %z"
 
-        date = re.sub('\([A-Z]{3}\)', '', date).strip()
+        date = re.sub('\([A-Z]{3}\)', '', message_date).strip()
         d = datetime.strptime(date, fmt)
 
         now = datetime.now(timezone.utc)
