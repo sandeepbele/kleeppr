@@ -20,7 +20,7 @@ class Command(BaseCommand):
             "Five Times a Week":"D",
         }
 
-        with open ("/Users/sandeep/Documents/SB_Sources/Kleeppr-django/kleeppr4/tmp") as fp:
+        with open ("/Users/sandeep/Documents/SB_Sources/Kleeppr-django/kleeppr4/nytimes_nwl_dump") as fp:
 
             css_soup = BeautifulSoup(fp.read(), 'html.parser')
 
@@ -28,9 +28,11 @@ class Command(BaseCommand):
                 cat = category.find(class_="css-1o0qd5y").text
                 tags = []
                 for c in re.split("and|&amp;|&",cat):
-                    tag = Tags.objects.filter(tag=c).first()
-                    if not tag:
-                        tag = Tags(tag=c)
+                    print("**"+c.strip()+"**")
+                    tag = Tags.objects.filter(tag=c.strip()).first()
+                    if tag is None:
+                        print("###created tag:",tag,c)
+                        tag = Tags(tag=c.strip())
                         tag.save()
 
                     tags.append(tag)
@@ -50,7 +52,7 @@ class Command(BaseCommand):
 
                         newsletter = Newsletters.objects.filter(letter=name).first()
                         print(newsletter)
-                        if not newsletter:
+                        if newsletter is None:
                             newsletter = Newsletters(letter=name)
 
                         newsletter.list_id='-'
@@ -67,5 +69,9 @@ class Command(BaseCommand):
                         newsletter.publisher=publisher
 
                         newsletter.save()
-                        newsletter.tags.set(tags)
+
+                        for t in tags:
+                            newsletter.tags.add(t)
+
+                        #newsletter.tags.set(tags)
                         newsletter.save()
