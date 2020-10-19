@@ -5,38 +5,38 @@
 {% block page_content %}
 
     <div class="container-fluid">
-        <div class="row">
+        <div class="row mx-md-5 ">
 
                 <div class="col-md-2 mt-3">
                 {%  if nwl %}
                  <div class="card text-center">
                                 <!---img class="card-img-top" data-src="holder.js/100x180/" alt="Card image cap"-->
                                 <div class="card-header ">
-                                    <h4> {{ nwl.letter }} </h4>
+                                    <h6> {{ nwl.letter }} </h6>
                                     <h6 class="text-muted"> By {{ nwl.author }}</h6>
                                 </div>
                                 <div class="card-body">
                                     <p class="card-text">{{ nwl.desc }} </p>
                                 </div>
                                 <div class="container mb-1">
-                                    <p class="card-text small text-muted">{{ nwl.tags }} {{ nwl.frequency }}</p>
+                                    <p class="card-text small text-muted">{{ nwl.get_tags }} {{ nwl.get_frequency }}</p>
                                 </div>
                                 <div class="card-footer text-center">
-                                    <a href="{{ nwl.url }}" target="_blank" class="btn btn-secondary stretched-link">View Webpage</a>
+                                    <a href="{{ nwl.url }}" target="_blank" class="btn btn-subscribe stretched-link">View Webpage</a>
                                 </div>
                     </div>
 
-                     {% else %}
+                     {% elif not pending_confirm %}
                      {% with request.resolver_match.url_name as url_name %}
                         <nav class="nav tags flex-md-column nav-fill nav-pills">
                             <a class="nav-link {% if url_name == 'recent' %} active{% endif %}" href="{% url 'recent' %}">Snapshot</a>
                             <a class="nav-link {% if url_name == 'feed' %} active{% endif %}"
-                                    href="{% url 'feed' %}">Timeline</a>
+                                    href="{% url 'feed' %}">Timeline {{ filterConfirmation }}</a>
                         </nav>
                     {% if url_name == 'recent' %}
-                        <div class="alert alert-secondary" role="alert">
+                        <!--div class="alert alert-secondary" role="alert">
                             <small>Snapshot shows recent issue of each newsletter.</small>
-                        </div>
+                        </div-->
                     {% endif %}
 
                      {% endwith %}
@@ -44,26 +44,72 @@
                      {% endif %}
                 </div>
 
-            <div class="col col-md-10 mt-2">
+            <div class="col col-md-10 mt-2 pl-0">
             <!--div class="col pl-6 ml-sm-5 mr-sm-5"-->
             <!--div class="col col-md-10 offset-md-1"-->
-            {% if page_obj.count <= 0 %}
-                 <div class="alert alert-warning fade show mt-3" role="alert">
-                   You have no active subscriptions. Please <a href="{% url 'explore' %}">explore</a> interesting newsletters and subscribe to start receiving them in your feed.
+            {% if page_obj.paginator.count <= 0 %}
+                <div class="card-body mt-0 pt-2">
+                    {% load form_helper %}
+                    {% with request.resolver_match.url_name as url_name %}
+                    {% is_recent_account request.user.date_joined as is_new_user %}
+                    {% if is_new_user %}
+                        {% if url_name == 'recent' %}
+                        <div class="alert alert-warning">
+                              Hey, have you <a href="{% url 'explore' %}"> subscribed </a> to a newsletter?
+                              If yes then hang tight, your newsletter issue must be in flight!
+                          </div>
+                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
+                                     allowfullscreen></img>
+
+
+                        {% else%}
+                          <div class="alert alert-warning">
+                              Hey, have you <a href="{% url 'explore' %}"> subscribed </a> to a newsletter?
+                              If yes then hang tight, your newsletter issue must be in flight!
+                          </div>
+                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
+                                     allowfullscreen></img>
+
+                        {% endif %}
+                    {% else %}
+                        {% if url_name == 'recent' %}
+                            <div class="alert alert-warning">
+                                  Hi there, we too are waiting for new issues!
+                              </div>
+                               <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
+                                         allowfullscreen></img>
+
+
+                        {% else%}
+                          <div class="alert alert-warning">
+                              Hey, we have been waiting for your newsletter issues!
+                          </div>
+                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
+                                     allowfullscreen></img>
+
+                        {% endif %}
+                     {% endif %}
+
+                    {% endwith %}
+
+
+                            <!--img class="embed-responsive-item w-100" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
+                                 allowfullscreen></img-->
                  </div>
+
 
             {% else %}
 
 
                 <ul class="list-group list-group-flush feed">
                     {% for feed_rec in page_obj.object_list  %}
-                    <li class="list-group-item">
+                    <li class="list-group-item py-0">
                         <div class="card border-0">
                             <div class="card-body">
                                 <a href="{% url 'letter' message_id=feed_rec.message_id %}">
-                                    <h5 class="card-title"> {{ feed_rec.subject | safe }}</h5>
+                                    <h6 class="card-title"> {{ feed_rec.subject | safe }}</h6>
                                 </a>
-                                <h6 class="card-subtitle text-muted">{{ feed_rec.nwl_id.letter | title }} by {{ feed_rec.nwl_id.author }}</h6>
+                                <h6 class="card-subtitle text-muted mt-1">{{ feed_rec.nwl_id.letter | title }} by {{ feed_rec.nwl_id.author }}</h6>
                                 <p class="card-text mt-2">{{ feed_rec.intro |safe }}...</p>
 
                                 <div class="card-text">

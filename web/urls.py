@@ -33,7 +33,7 @@ urlpatterns = [
     path('recent', views.recent_feed,name='recent'),
     path('privacy', views.terms,{ 'show':'pp'} ,name='privacy'),
     path('cookie', views.terms,{ 'show':'ck'} ,name='cookie'),
-    path('terms', views.terms,{ 'show':'tc'} ,name='terms'),
+    path('terms', views.terms,{ 'show':'tc'} ,name='terms')
 
     #re_path(r'^favicon\.ico$', favicon_view),
 ]

@@ -1,8 +1,8 @@
 
 {% block navbar %}
 
-            <nav class="navbar navbar-expand-md navbar-light bg-light">
-                <div class="container-fluid">
+            <nav class="navbar navbar-expand-md navbar-light" style="background-color2:#F5F9FC">
+                <div class="container-fluid mx-md-5">
                     {% if request.user.is_authenticated %}
                         <a class="navbar-brand h3 col-2 mr-0" href="{% url 'feed' %}">
                             { Kleeppr }
@@ -22,7 +22,7 @@
                         </button>
 
                         <!-- put everything that goes inside hamberger menu inside "collapse navbar-collapse" class -->
-                        <div class="collapse navbar-collapse pl-2" id="klpMenu">
+                        <div class="collapse navbar-collapse pl-0" id="klpMenu">
                         {% with request.resolver_match.url_name as url_name %}
                             <ul class="navbar-nav">
                                 <!-- nav-link text below is right justified in style.css for hanmberger menu -->

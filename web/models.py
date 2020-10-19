@@ -44,7 +44,7 @@ class Newsletters(models.Model):
     def get_tags(self):
         tags = self.tags.all().values_list('tag',flat=True)
         if tags:
-            return " ".join(tags)
+            return ",".join(tags)
         else:
             return "uncategorized"
 

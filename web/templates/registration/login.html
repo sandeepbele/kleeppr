@@ -7,36 +7,47 @@
 
 
     <div class="container-fluid">
-        <div class="d-flex justify-content-center mt-5 ">
-
-            <div class="card w-50 ">
-                <div class="card-header ">
+        <div class="row d-flex2 justify-content-center my-5 ">
+           <div class="col-lg-6">
+            <div class="card ">
+                <div class="card-header">
                     <h4>Sign into Kleeppr</h4>
-                    <h6 class="text-muted ">Your alternate inbox for newsletters</h6>
+                    <h6 class="text-muted ">Your inbox for email newsletters</h6>
                 </div>
 
-                {% if form.errors %}
-                    <p>Your username and password didn't match. Please try again.</p>
-                {% endif %}
+                 <div class="card-body">
 
-                <div class="card-body ">
+                    {% if form.errors %}
+                         <div class="alert alert-primary" >
+                             <i class="fas fa-exclamation-circle" style="color:#dc3545"></i>
+                             &nbsp;Your username or password didn't match. Please try again.
+                         </div>
+                    {% endif %}
+
+
 
                     <form id="login_user_form" action="{% url 'login' %}" method="post" name="login_user_form" class="needs-validation" novalidate>
 
                         {% csrf_token %}
-
+                        {% load form_helper %}
                         <div class="form-group">
                             <label for="username">Email address </label>
-                            <input type="email" class="form-control" name="username" id="username" placeholder="joe@example.com">
+                            <input type="email" class="form-control" name="username" id="username" placeholder="joe@example.com" required>
+                            <div class="invalid-feedback">
+                                 Valid email is required.
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password"class="form-control" name="password" id="password" placeholder="<super secret strong password>">
+                            <input type="password"class="form-control" name="password" id="password" placeholder="<super secret strong password>" required>
+                            <div class="invalid-feedback">
+                                 Password is required.
+                            </div>
                         </div>
 
                         <input id="next" name="next" type="hidden" value="{{ next }}">
 
-                        <button type="submit" class="btn btn-secondary" name="submit" value="Login">Sign In</button>
+                        <button type="submit" class="btn btn-secondary btn-subscribe" name="submit" value="Login">Sign In</button>
                     </form>
                 </div>
 
@@ -48,6 +59,14 @@
 
             </div>
         </div>
+        </div>
     </div>
 
 {% endblock %}
+
+{% block custom_js %}
+<script>
+   formValidatorEventListener ();
+</script>
+
+{% endblock%}

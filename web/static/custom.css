@@ -23,13 +23,21 @@ body {
 .pagination .page-item a:hover { color: #303036; }
 
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-    color: #fff;
-    background-color: #0479d2;
+    #color: #fff;
+    color: #002D62;
+    background-color: #6CB4EE;
+    opacity: 0.9
     }
 
 .nav-pills .nav-link {
     color: #0479d2;
     }
+
+.btn-subscribe {
+    color: #fff;
+    background-color: #0479d2;
+}
+
 
 .navbar-nav .nav-link {
     color:#555d65;
@@ -37,6 +45,10 @@ body {
 
 .navbar-nav .nav-link.active {
     font-weight:600;
+}
+
+.navbar-light {
+    background-color:#F5F9FC;
 }
 
  .fade {
@@ -81,8 +93,13 @@ body {
 .ml1 .line1 { top: 0; }
 .ml1 .line2 { bottom: 0; }
 
+.
+
 ###0479d2
 
 ###ff4602
 
 ###dae0e6
+
+##F1F6FA navbar
+##F5F9FC navbar light

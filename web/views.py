@@ -155,15 +155,15 @@ def register_user(request):
                 else:
                     error = "Automatic user authentication failed. Please try again. "
             else:
-                error = "Ouch ..error occurred processing input. Please try again."
-                for err in form.errors:
-                    error += err+":"+form.errors[err]
+                error = "Please correct the errors and try again."
+            #    for err in form.errors:
+            #        error += err+":"+form.errors[err]
         else:
             error = "Ooops..Email address is already taken. Try again or use password reset link to recover your account."
 
-        log("Error: user registration failed:" + username + ", error:" + error, logging.ERROR, request)
+        log("Error: user registration failed:" + username + ", error:" + str(error), logging.ERROR, request)
 
-    return render(request,'web/register_user.html', {'form':form, 'extra_context':{ 'error':error}})
+    return render(request,'web/register_user.html', {'form':form, 'extra_context':{ 'error':error, 'form_errors':form.errors}})
 
 
 @log_the_request
@@ -189,7 +189,7 @@ def user_feed(request,nwl_id=None,filterConfirmation=False):
     #match = resolve('/list/58')
     #print(match.url_name)
 
-    context = { 'nwl':nwl, 'page_obj':page_obj, 'error':error }
+    context = { 'nwl':nwl, 'page_obj':page_obj, 'error':error, 'pending_confirm': filterConfirmation }
     return render(request, "feed.html",context=context)
 
 @log_the_request
@@ -269,9 +269,9 @@ def my_sub(request):
 
 
 @log_the_request
-def explore(request,tag="all"):
+def explore(request,tag="All"):
     tag = tag.strip()
-    if tag != "all":
+    if tag != "All":
         print("tag:",tag)
         letters = Newsletters.objects.filter(tags__tag=tag).order_by('id')
     else:
@@ -279,7 +279,7 @@ def explore(request,tag="all"):
 
     letters = [ letter for letter in letters if letter.is_complete() ]
 
-    paginator = Paginator(letters, per_page=25)
+    paginator = Paginator(letters, per_page=24)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -289,7 +289,7 @@ def explore(request,tag="all"):
         follow = request.session['follow']
         del request.session['follow']
 
-    return render(request, "explore.html", { 'page_obj':page_obj, 'tags':tags, 'follow':follow })
+    return render(request, "explore.html", { 'page_obj':page_obj, 'tags':tags, 'follow':follow, 'selected_tag':tag })
 
 
 @log_the_request
@@ -329,7 +329,7 @@ def search_letters(request):
             Q(tags__tag__icontains=term)
         )
 
-        paginator = Paginator(letters, per_page=25)
+        paginator = Paginator(letters, per_page=24)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -351,3 +351,7 @@ def terms(request,show='tc'):
         return render(request, "terms-and-conditions.html")
     elif show == 'ck':
         return render(request, "cookie-policy.html")
+
+
+def explore2(request):
+    return render(request,"web/explore2.html")

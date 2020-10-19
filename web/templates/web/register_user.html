@@ -5,34 +5,43 @@
 {% block page_content %}
 
     <div class="container-fluid">
-        <div class="d-flex justify-content-center mt-5">
-            <div class="card w-50">
+        <div class="row justify-content-center my-5">
+            <div class="col-lg-6">
+            <div class="card">
                 <div class="card-header">
                     <h4>Sign up for Kleeppr</h4>
-                    <h6 class="text-muted">Your alternate inbox for newsletters</h6>
+                    <h6 class="text-muted">Your inbox for email newsletters</h6>
                 </div>
                 <div class="card-body">
 
                     {% if extra_context.error %}
-                    <div class="alert alert-primary" role="alert"> {{ extra_context.error }} </div>
+                    <div class="alert alert-primary" > <i class="fas fa-exclamation-circle" style="color:#dc3545"></i>&nbsp;{{ extra_context.error }} </div>
                     {% endif %}
 
+                    {% load form_helper %}
                     <form action="{%  url 'register' %}" method="POST" name="register_user_form" class="needs-validation" novalidate>
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="username">Email address </label>
-                            <input type="email" {% if email %} value="{{ email }}" {% endif %} class="form-control" id="username" name="username" aria-describedby="emailHelp" placeholder="{% if email %} {{ email }} {% else %} Enter your email {% endif %}" required>
-
+                            <input type="email"  value="{{ form.username.value |default:'' }}" class="form-control {% is_field_invalid 'username' extra_context.form_errors %}" id="username" name="username" aria-describedby="emailHelp" placeholder="{% if email %} {{ email }} {% else %} Enter your email {% endif %}" required>
+                            <div class="invalid-feedback">
+                                Valid email address is required.
+                            </div>
                         </div>
                         <div class="form-group {% if email %} focus {% endif %}">
                             <label for="password1">Password</label>
-                            <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" required>
-
+                            <input type="password" class="form-control {% is_field_invalid 'password' extra_context.form_errors %}" id="password1" name="password1" placeholder="Password" required>
+                            <div class="invalid-feedback">
+                                Password is required.
+                            </div>
                         </div>
 
                          <div class="form-group">
                             <label for="password2">Confirm Password</label>
-                            <input type="password" class="form-control" id="password2" name="password2" placeholder="Password" required>
+                            <input type="password" class="form-control {% is_field_invalid 'password2' extra_context.form_errors %}" id="password2" name="password2" placeholder="Password" required>
+                             <div class="invalid-feedback">
+                                {% get_field_invalid_msg 'password2' extra_context.form_errors 'Password is required.' %}
+                            </div>
                         </div>
 
                         <div class="form-check">
@@ -40,11 +49,14 @@
                         <label class="form-check-label text-top" for="agreement">
                             I have read and agree to <a href="{% url 'privacy' %}"> Privacy Policy </a> , <a href="{% url 'cookie' %}"> Cookie Policy </a> and <a href="{% url 'terms' %}"> Terms and Conditions. </a>
                         </label>
+                           <div class="invalid-feedback">
+                                You must agree before submitting.
+                            </div>
                         </div>
 
                         <input id="next" name="next" type="hidden" value="{{ next }}">
-                        <div class="mt-2">
-                        <button type="submit" class="btn btn-secondary" name="submit" value="Register">Sign Up</button>
+                        <div class="mt-4">
+                        <button type="submit" class="btn btn-subscribe" name="submit" value="Register">Create My Kleeppr Account</button>
                         </div>
                     </form>
 
@@ -57,6 +69,14 @@
 
             </div>
         </div>
+        </div>
     </div>
 
 {% endblock %}
+
+{% block custom_js %}
+<script>
+   formValidatorEventListener ();
+</script>
+
+{% endblock%}

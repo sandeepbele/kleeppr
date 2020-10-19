@@ -3,43 +3,87 @@
 {% include 'navbar.html' %}
 
 {% block page_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-2 mt-3">
+<div class="container-fluid">
+    <div class="row mx-md-5">
+        <div class="col-md-2 mt-3 ">
+             <nav class="nav tags flex-md-column nav-fill nav-pills">
+                 <a class="nav-link" href="#primer">Quick Primer</a>
+                 <a class="nav-link" href="#demo">Product Tour</a>
+                 <a class="nav-link" href="#questions">FAQ</a>
+                 <a class="nav-link" href="#contact">Contact</a>
+             </nav>
         </div>
+
         <div class="col mt-3">
+            <h5 id="primer" class="mt-2">Hey there, welcome to Kleeppr! <!--i class="fa fa-heart" style="font-size:36px;color:red"></i--></h5>
 
+            <h6 class="mt-3"><i class="fas fa-shoe-prints fa-2x"></i><i class="fas fa-shoe-prints"></i> Let's get you started! </h6>
+            <div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item h1">Welcome To Kleeppr <i class="fa fa-heart" style="font-size:36px;color:red"></i></li>
-                <li class="list-group-item">1. Install <a href="{% url 'bookmark' %}">Bookmarklet</a></li>
-                <li class="list-group-item">2. Start <a href="{% url 'explore' %}">exploring</a> interesting newsletters</li>
-                <li class="list-group-item">3. Use <a href="{% url 'bookmark' %}">Bookmarklet</a> or copy-paste your <a href="{% url 'bookmark' %}">Kleeppr ID</a> to subscribe to newsletters</li>
-                <li class="list-group-item">4. Come back and check <a href="{% url 'confirmsub' %}">Pending confirmations</a></li>
-                <li class="list-group-item">5. Check your <a href="{% url 'recent' %}">Feed</a></li>
-
-                <li class="list-group-item">>> Take this 60 sec
+                <li class="list-group-item">
+                    <i class="far fa-hand-point-right fa-2x"></i> Install <a href="{% url 'bookmark' %}">Kleeppr Bookmarklet</a>
+                    <p class="text-muted mt-2">
+                        Kleeppr Bookmarklet provides a shortcut to fill in your KleepprID in newsletter's subscription form.
+                        We strongly recommend you install it as its most convenient and effective way of using Kleeppr. Just follow above link
+                        for installation steps. Alternatively you can copy/note down your KleepprID.
+                    </p>
+                </li>
+                <li class="list-group-item">
+                     <i class="far fa-hand-point-right fa-2x"></i> <a href="{% url 'explore' %}"> Explore & Subscribe</a> interesting newsletters
+                     <p class="text-muted mt-2">
+                        Head over to Explore tab and check out hundreds of newsletters out there. Feel free to give them a try. Hit subscribe and we will redirect you to newsletter's website. Once you are there,
+                         click on bookmarklet or copy/paste your KleepprID to subscribe.
+                    </p>
+                </li>
+                <li class="list-group-item">
+                    <i class="far fa-hand-point-right fa-2x"></i> Come back and check <a href="{% url 'confirmsub' %}">Pending confirmations</a>
+                    <p class="text-muted mt-2">
+                       Many newsletters ask you to opt-in to the subscription before they start sending you emails. So once you subscribe, come back and check Pending Confirmations tab.
+                       Do not forget to confirm your subscriptions.
+                    </p>
+                </li>
+                <li class="list-group-item">
+                    <i class="far fa-hand-point-right fa-2x"></i> Check your <a href="{% url 'recent' %}">Feed</a>
+                    <p class="text-muted mt-2">
+                       Each newsletter has different frequency. Depending on what and when you have subscribed,
+                        you will have to wait a bit before you start receiving issues in your feed for the first time.
+                    </p>
+                    <p class="text-muted">
+                       Your feed has two flavors - Recent & Snapshot. Snapshot is chronologically ordered feed of issues as they are received.
+                       Recent shows only a latest issue of each newsletter. It brings focus on all type of newsletters irrespective of their schedule.
+                    </p>
+                </li>
+                <li class="list-group-item">
+                    <i class="far fa-hand-point-right fa-2x"></i> Periodically review your <a href="{% url 'mysub' %}">Subscriptions</a>
+                    <p class="text-muted mt-2">
+                      Review all your subscriptions at one place. Easily unsubscribe or check issues of specific newsletter.
+                    </p>
+                </li>
+            </ul>
+            </div>
+            <p class="h6 mt-2" id="demo"><i class="fas fa-video fa-2x pr-2"></i> Take this 60 sec
                     <a class="btn2 btn-primary2" data-toggle="collapse" href="#tour" role="button"
                        aria-expanded="false" aria-controls="tour">
                         Product Tour
                     </a>
-                    <div class="collapse show" id="tour">
-                        <div class="card-header mt-3">
+                    <div class="collapse show card mt-4" id="tour">
+
+                        <div class="card-header">
                             <p>Welcome. Take a quick tour of our features.</p>
                         </div>
                         <div class="card-body">
                             {% load static %}
                             <img class="embed-responsive-item w-100" src="{% static 'web/recording.gif' %}"
                                  allowfullscreen></img>
-
                         </div>
                     </div>
-                </li>
-                <li class="list-group-item">>> FAQ is
-                    <a class="btn2 btn-primary2" data-toggle="collapse" href="#faq" role="button"
+            </p>
+                <p class="h6 mt-4" id="questions"> <i class="far fa-question-circle fa-2x pr-2"></i> FAQ is
+                     <a class="btn2 btn-primary2" data-toggle="collapse" href="#faq" role="button"
                        aria-expanded="false" aria-controls="faq">
                         here
                     </a>
-                 <div class="collapse" id="faq">
+                 <div class="collapse show" id="faq">
                      <ul class="list-group list-group-flush">
                          <li class="list-group-item">
                              <p><strong>I subscribed to a newsletter but don't see anything in feed? </strong></p>
@@ -61,10 +105,10 @@
                          </li>
                      </ul>
                  </div>
-                </li>
-                <li class="list-group-item">>> We are available at: hello@kleeppr.com</li>
+                </p>
+                <p class="h6 mt-2 mb-4" id="contact"> <i class="far fa-envelope fa-2x pr-2"></i> We are available at: hello@kleeppr.com</p>
 
-                </ul>
+
         </div>
     </div>
 </div>

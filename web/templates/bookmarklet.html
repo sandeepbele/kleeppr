@@ -5,31 +5,64 @@
 {% block page_content %}
 
 
-<div class="container">
-    <div class="row">
+<div class="container-fluid">
+    <div class="row mx-md-5">
 
         <div class="col-md-2 mt-3">
         </div>
         <div class="col col-md-10 mt-2">
-            <div class="card border-0 mt-2">
+            <ul class="list-group list-group-flush">
 
-                <div class="card-body">
-                    <p> Username: {{ request.user }} </p>
-                    <p id="appid">Your Kleeppr ID: <strong class="appid"><em>{{ request.session.appid }}@private.kleepprid.com</em></strong>
-                        <button data-toggle="tooltip" data-placement="right" title="Copy to Clipboard"
-                                onClick="copyToClipboard(document.querySelector('.appid').innerText);showAlert('Your Kleeppr ID is copied to clipboard.','appid');">
-                            <i class="far fa-copy"></i>
-                        </button>
+                <li class="list-group-item">
+                    <h6>KleepprID</h6><p class="small text-muted">Use KleepprID to subscribe to newsletters.</p>
+                    <h7 id="appid" class="appid">{{ request.session.appid }}@private.kleepprid.com</h7>
+                     <!--h7 id="appid" class="appid">secret@private.kleepprid.com</h7-->
+
+                    <button data-toggle="tooltip" data-placement="right" title="Copy to Clipboard"
+                            onClick="copyToClipboard(document.querySelector('.appid').innerText);showAlert('Your Kleeppr ID is copied to clipboard.','appid');">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </li>
+                <li class="list-group-item">
+                    <h6>Bookmarklet</h6>
+                    <p class="card-text">
+                        Drag and drop bookmarklet <a class="btn btn-primary btn-md rounded-pill" style="color:white" data-toggle="tooltip"
+                                              data-placement="top" title="Drag to Install Bookmark"
+                                              href="javascript:(function()%7Bvar%20e%20%3D%20document.activeElement%3Be.value%20%3D%20%22{{ appid }}%40private.kleepprid.com%22%7D)()">
+                        { Kleeppr }</a> on browser's bookmark bar to install it.</p>
+                    <p class="card-text">Bookmarklet quickly fills in KleepprID in newsletter subscription
+                        form. Once you are on newsletter subscription page, locate email field, click on it and then click on
+                        bookmarklet.</p>
+                    <p class="card-text">
+                        First, in order to ensure that the Kleeppr bookmarklet is easily accessible, please make sure that your bookmarks/favorites bar is shown. Here are instructions on how to make this toolbar visible in a few popular browsers:
+                        <ul>
+                            <li><a href="http://support.google.com/chrome/bin/answer.py?hl=en&answer=95745">Google Chrome</a></li>
+                            <li><a href="http://support.mozilla.org/en-US/kb/Bookmarks%20Toolbar">Mozilla Firefox</a></li>
+                            <li><a href="http://support.apple.com/kb/HT4550">Safari</a></li>
+                            <li><a href="http://windows.microsoft.com/en-US/windows7/Show-or-hide-the-Favorites-bar-in-Internet-Explorer">Internet Explorer</a></li>
+                            <li><a href="http://my.opera.com/desktopteam/blog/2010/09/15/hello-bookmarks-bar">Opera</a></li>
+                        </ul>
                     </p>
 
-                    <p class="card-text">
-                        Drag and drop this <a class="btn btn-primary btn-sm" style="color:white" data-toggle="tooltip" data-placement="top" title="Drag to Install Bookmark"
-                                              href="javascript:(function()%7Bvar%20e%20%3D%20document.activeElement%3Be.value%20%3D%20%22{{ appid }}%40private.kleepprid.com%22%7D)()">
-                        Kleeppr Bookmarklet</a> on browser's bookmark bar to install it.</p>
-                    <p class="card-text">Bookmarklet can quickly fill in Kleeppr ID in newsletter subscription
-                        form. When you are on subscription page, just click on email field and then click on bookmarklet.</p>
-                </div>
-            </div>
+                      <p class="card-text">
+                          Once your bookmarks/favorites bar is visible, follow these instructions to install and use the bookmarklet:
+                        {% load static %}
+                          <div>
+                        <img class="embed-responsive-item w-50 border mt-3" src="{% static 'web/bookmarklet-demo.gif' %}"
+                                 allowfullscreen></img>
+                    </div>
+                    </p>
+
+                </li>
+                 <li class="list-group-item">
+                    <h6>Username</h6>
+                    <h7>{{ request.user }}</h7>
+                    <!--h7>user@mydomain.com</h7-->
+                </li>
+                <li class="list-group-item">
+                    <h6>Logged in since</h6>
+                    <p class="card-text"> {{ request.user.last_login }}</p>
+            </ul>
         </div>
     </div>
 </div>

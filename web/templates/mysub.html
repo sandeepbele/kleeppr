@@ -5,7 +5,7 @@
 {% block page_content %}
 
     <div class="container-fluid">
-        <div class="row">
+        <div class="row md-mx-5">
             <!-- for small screens col-12: start will all space, all 12 columns, show one horizontal column -->
             <!-- have 2 coulmn width for medium and up-->
             <div class="col-12 col-md-2">
@@ -32,7 +32,40 @@
                      </div>
 
                 {% else %}
-                <div class="d-flex flex-row justify-content-between mt-md-3">
+
+                    <ul class="list-group list-group-flush">
+                        {% for card in page_obj.object_list %}
+                         <li class="list-group-item">
+                            <div class="card border-0">
+
+                            <!---img class="card-img-top" data-src="holder.js/100x180/" alt="Card image cap"-->
+
+                            <div class="card-body">
+                                 <div class="card-title">
+                                <h6> {{ card.nwl_id.letter }} </h6>
+                                <h6 class="text-muted"> By {{ card.nwl_id.author }}</h6>
+                            </div>
+                                <p class="card-text">{{ card.nwl_id.desc }} </p>
+
+
+                                <p class="card-text small text-muted">{{ card.nwl_id.get_tags }} | {{ card.nwl_id.get_frequency }}</p>
+
+                                <a href="{% url 'nwl_feed' nwl_id=card.nwl_id.id %}"  class="btn btn-sm btn-outline-primary">Show Letters</a>
+
+
+                                {% if card.unsub_url and card.unsub_url != "" and card.unsub_url != "unknown" %}
+                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1" >Unsubscribe</a>
+                                {% else %}
+                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1 disabled">Unsubscribe</a>
+                                {% endif %}
+
+
+                                </div>
+                        </div>
+                         </li>
+                        {% endfor %}
+                   </ul>
+                                    <div class="d-flex flex-row justify-content-between mt-md-3">
                     <div></div>
                  <div class="nav">
                          <ul class="pagination pagination-sm">
@@ -61,38 +94,6 @@
                         </ul>
                  </div>
                 </div>
-                    <ul class="list-group list-group-flush">
-                        {% for card in page_obj.object_list %}
-                         <li class="list-group-item">
-                            <div class="card border-0">
-
-                            <!---img class="card-img-top" data-src="holder.js/100x180/" alt="Card image cap"-->
-
-                            <div class="card-body">
-                                 <div class="card-title">
-                                <h4> {{ card.nwl_id.letter }} </h4>
-                                <h6 class="text-muted"> By {{ card.nwl_id.author }}</h6>
-                            </div>
-                                <p class="card-text">{{ card.nwl_id.desc }} </p>
-
-
-                                <p class="card-text small text-muted">{{ card.nwl_id.get_tags }} | {{ card.nwl_id.get_frequency }}</p>
-
-                                <a href="{% url 'nwl_feed' nwl_id=card.nwl_id.id %}"  class="btn btn-sm btn-outline-primary">Show Letters</a>
-
-
-                                {% if card.unsub_url and card.unsub_url != "" and card.unsub_url != "unknown" %}
-                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1" >Unsubscribe</a>
-                                {% else %}
-                                    <a href="{{ card.unsub_url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-1 disabled">Unsubscribe</a>
-                                {% endif %}
-
-
-                                </div>
-                        </div>
-                         </li>
-                        {% endfor %}
-                   </ul>
                     {% endif %}
                     </div>
                 </div>
