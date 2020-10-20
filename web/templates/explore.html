@@ -35,12 +35,21 @@
                          <!--nav class="navbar navbar-expand-lg"-->
                              <form class="form-inline w-100 justify-content-center my-3" method="post" action="{% url 'search_explore' %}">
                                   {% csrf_token %}
-                                 <input class="form-control w-50 mr-2" id="term" name="term" type="search" placeholder="Newsletter | Author | Description" aria-label="Search">
+                                 <input class="form-control w-50 mr-2" id="term" name="term" value="{{ term }}" type="search" placeholder="Search by: Newsletter Or  Author Or Description" aria-label="Search">
                               <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                             </form>
                         <!--/nav-->
                     <!--/div-->
                     <hr class="w-100"/>
+                        <div>
+                            {% if term %}
+                            <p><i class="fas fa-skiing"></i> Showing search results for "{{ term }}"
+                            {% if page_obj.paginator.count == 0 %}
+                                : No results found!
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
                     <!--/div-->
 
 
@@ -75,11 +84,7 @@
                     </div>
 
                 <div class="d-flex flex-row justify-content-between mt-md-3">
-                        <div>
-                            {% if term %}
-                            <p>Search results for "{{ term }}"</p>
-                            {% endif %}
-                        </div>
+
                         <div class="nav">
                          <ul class="pagination pagination-sm">
                              <li class="page-item text-center small text-muted m-2">

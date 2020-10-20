@@ -277,19 +277,25 @@ def explore(request,tag="All"):
     else:
         letters = Newsletters.objects.order_by('id')
 
-    letters = [ letter for letter in letters if letter.is_complete() ]
+    tags = letters.values_list('tags__tag',flat=True)
+    unique_tags = []
+    for t in tags:
+        if t not in unique_tags:
+            unique_tags.append(t)
+
+    letters = [ letter for letter in letters if letter.is_complete() and letter.is_active and letter.is_verified ]
 
     paginator = Paginator(letters, per_page=24)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    tags = Tags.objects.filter().values_list('tag',flat=True)
+
     follow = None
     if 'follow' in request.session:
         follow = request.session['follow']
         del request.session['follow']
 
-    return render(request, "explore.html", { 'page_obj':page_obj, 'tags':tags, 'follow':follow, 'selected_tag':tag })
+    return render(request, "explore.html", { 'page_obj':page_obj, 'tags':unique_tags, 'follow':follow, 'selected_tag':tag })
 
 
 @log_the_request
@@ -317,10 +323,10 @@ def follow(request, next):
 
 @log_the_request
 def search_letters(request):
-    print("assdsad")
+
     if request.method == 'POST':
         term = request.POST['term']
-        print("term",term)
+        #print("term",term)
         letters = Newsletters.objects.filter(
             Q(letter__icontains=term) |
             Q(desc__icontains=term) |
@@ -328,6 +334,8 @@ def search_letters(request):
             Q(url__icontains=term) |
             Q(tags__tag__icontains=term)
         )
+
+        letters = [letter for letter in letters if letter.is_complete() and letter.is_active and letter.is_verified]
 
         paginator = Paginator(letters, per_page=24)
         page_number = request.GET.get('page')

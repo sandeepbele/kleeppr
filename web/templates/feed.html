@@ -110,7 +110,7 @@
                                     <h6 class="card-title"> {{ feed_rec.subject | safe }}</h6>
                                 </a>
                                 <h6 class="card-subtitle text-muted mt-1">{{ feed_rec.nwl_id.letter | title }} by {{ feed_rec.nwl_id.author }}</h6>
-                                <p class="card-text mt-2">{{ feed_rec.intro |safe }}...</p>
+                                <p class="card-text mt-2" style="font-size:15px">{{ feed_rec.intro |safe }}...</p>
 
                                 <div class="card-text">
                                     <small>{{ feed_rec.get_x_time_ago }} | {{ feed_rec.nwl_id.get_tags }}</small>
