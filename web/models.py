@@ -88,6 +88,7 @@ class UserSettings(models.Model):
     email = models.EmailField(null=True)
     appid = models.TextField(null=True)
     feeder_ts = models.DateTimeField(null=True)
+    email_verified = models.BooleanField(null=True, default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

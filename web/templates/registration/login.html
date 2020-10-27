@@ -17,6 +17,14 @@
 
                  <div class="card-body">
 
+                     {% if msg %}
+                         <div class="alert alert-primary" >
+                            <i class="far fa-thumbs-up"></i>
+                             &nbsp;{{ msg }}
+                         </div>
+
+                     {% endif %}
+
                     {% if form.errors %}
                          <div class="alert alert-primary" >
                              <i class="fas fa-exclamation-circle" style="color:#dc3545"></i>

@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
 # Create your views here
 from django.http import HttpResponse
+from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
 import django.contrib.auth.urls
 
@@ -29,6 +30,14 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out, user_lo
 from django.dispatch import receiver
 
 from django.urls import resolve,reverse
+
+from django.contrib.postgres.search import SearchVector, SearchQuery
+
+from django.contrib.auth import login
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
+
+from web.tokens import account_activation_token
 
 def log_the_request(view_func):
     def log_decorator(request,*args, **kwargs):
@@ -164,6 +173,33 @@ def register_user(request):
         log("Error: user registration failed:" + username + ", error:" + str(error), logging.ERROR, request)
 
     return render(request,'web/register_user.html', {'form':form, 'extra_context':{ 'error':error, 'form_errors':form.errors}})
+
+
+class ActivateAccountView(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        print(token,account_activation_token.make_token(user))
+        if user is not None and account_activation_token.check_token(user, token):
+
+            user_settings = UserSettings.objects.filter(user_id=user.pk).first()
+            if not user_settings:
+                raise Exception("Usersettings not found for " + user.username)
+
+            user_settings.email_verified = True
+            user_settings.save()
+
+            #login(request, user)
+            #return redirect('login_with_msg', context={'msg':"Thanks for verifying your email, please login to proceed."})
+            #return redirect('login')
+            return render(request,'registration/login.html',context={'msg':"Thanks for verifying your email, please login to proceed."})
+        else:
+            # invalid link
+            return render(request, 'invalid.html')
 
 
 @log_the_request
@@ -327,16 +363,21 @@ def search_letters(request):
     if request.method == 'POST':
         term = request.POST['term']
         #print("term",term)
-        letters = Newsletters.objects.filter(
+        '''letters = Newsletters.objects.filter(
             Q(letter__icontains=term) |
             Q(desc__icontains=term) |
             Q(author__icontains=term) |
             Q(url__icontains=term) |
             Q(tags__tag__icontains=term)
-        )
+        )'''
 
-        letters = [letter for letter in letters if letter.is_complete() and letter.is_active and letter.is_verified]
+        #https://docs.djangoproject.com/en/3.1/ref/contrib/postgres/search/#postgresql-fts-search-configuration
+        letters = Newsletters.objects.annotate(
+                    search = SearchVector('letter', 'desc','author','tags__tag'),
+                              ).filter(search=SearchQuery(term)).distinct()
 
+        letters = {letter for letter in letters if letter.is_complete() and letter.is_active and letter.is_verified}
+        letters = list(letters)
         paginator = Paginator(letters, per_page=24)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -361,5 +402,9 @@ def terms(request,show='tc'):
         return render(request, "cookie-policy.html")
 
 
-def explore2(request):
-    return render(request,"web/explore2.html")
+def search(request):
+    return render(request,"search.html")
+
+
+def error(request):
+    return render(request,"500.html")

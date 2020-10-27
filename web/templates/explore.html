@@ -9,6 +9,8 @@
             <!-- for small screens col-12: start will all space, all 12 columns, show one horizontal column -->
             <!-- have 2 coulmn width for medium and up-->
             <div class="col-md-2 mt-3">
+
+                  {%  if request.user.is_authenticated  %}
                 <!-- flex-xl-column: stack/show vertical nav only for anything above extra small screens-->
                 <nav class="nav tags flex-md-column nav-fill nav-pills">
                     <a class="nav-link {% if selected_tag == 'All' %} active{% endif %}" href="{% url 'tag_explore' tag='All' %}">All</a>
@@ -19,6 +21,8 @@
                     {% endfor %}
 
                 </nav>
+                {% endif %}
+
             </div>
             <div class="col">
                 <!--div class="container" -->
@@ -36,7 +40,7 @@
                              <form class="form-inline w-100 justify-content-center my-3" method="post" action="{% url 'search_explore' %}">
                                   {% csrf_token %}
                                  <input class="form-control w-50 mr-2" id="term" name="term" value="{{ term }}" type="search" placeholder="Search by: Newsletter Or  Author Or Description" aria-label="Search">
-                              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                              <button class="btn btn-subscribe my-2 my-sm-0" type="submit">Search</button>
                             </form>
                         <!--/nav-->
                     <!--/div-->
@@ -46,6 +50,8 @@
                             <p><i class="fas fa-skiing"></i> Showing search results for "{{ term }}"
                             {% if page_obj.paginator.count == 0 %}
                                 : No results found!
+                                {% else %}
+                                : {{ page_obj.paginator.count }} result/s found
                                 {% endif %}
                             </p>
                             {% endif %}
@@ -83,7 +89,7 @@
                         {% endfor %}
                     </div>
 
-                <div class="d-flex flex-row justify-content-between mt-md-3">
+                <div class="d-flex flex-row justify-content-end mt-md-3">
 
                         <div class="nav">
                          <ul class="pagination pagination-sm">

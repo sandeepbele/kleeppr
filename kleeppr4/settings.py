@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions'
+    'django_extensions',
+    'mail_templated',
 ]
 
 MIDDLEWARE = [
@@ -169,6 +170,10 @@ EMAIL_HOST_USER="sandeep@kleeppr.com"
 EMAIL_HOST_PASSWORD=os.getenv("DJANGO_EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL="Kleeppr Support <noreply@kleeppr.com>"
 
+NOTIFICATION_TO_EMAIL="sandeep.bele@gmail.com"
+
+WELCOME_FROM_EMAIL = 'Kleeppr Support <hello@kleeppr.com>'
+
 PASSWORD_RESET_TIMEOUT_DAYS=1
 
 IMAP_HOST="mail.kleeppr.com"
@@ -177,6 +182,13 @@ IMAP_USER_PREFIX="u"
 CACHE_PATH= os.path.join(get_runtime_dir(),"cache")
 
 APPID_MAIL_SERVER_DOMAIN = "private.kleepprid.com"
+
+MAIL_TEMPLATED_DOMAIN= os.getenv("MAIL_TEMPLATED_DOMAIN")
+
+if not MAIL_TEMPLATED_DOMAIN:
+    MAIL_TEMPLATED_DOMAIN = "https://kleeppr.com"
+
+
 
 LOGGING = {
 

@@ -1,6 +1,6 @@
 
 {% block navbar %}
-
+        {% with request.resolver_match.url_name as url_name %}
             <nav class="navbar navbar-expand-md navbar-light" style="background-color2:#F5F9FC">
                 <div class="container-fluid mx-md-5">
                     {% if request.user.is_authenticated %}
@@ -8,12 +8,12 @@
                             { Kleeppr }
                         </a>
                     {% else %}
-                         <a class="navbar-brand h3 col-2 mr-0" href="{% url 'index' %}">
-                            { Kleeppr }
+                        <a class="navbar-brand h3 col-2 mr-0" href="{% url 'index' %}">
+                          { Kleeppr }
                         </a>
                     {% endif %}
 
-                    {% if request.user.is_authenticated %}
+                    {% if request.user.is_authenticated and url_name != "search" %}
 
                         <!-- note data-target pointing to collapse-div -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#klpMenu"
@@ -23,7 +23,7 @@
 
                         <!-- put everything that goes inside hamberger menu inside "collapse navbar-collapse" class -->
                         <div class="collapse navbar-collapse pl-0" id="klpMenu">
-                        {% with request.resolver_match.url_name as url_name %}
+
                             <ul class="navbar-nav">
                                 <!-- nav-link text below is right justified in style.css for hanmberger menu -->
 
@@ -48,17 +48,24 @@
                                 {% endif %}
                                 <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>
                             </ul>
-                            {% endwith %}
+
 
                         {% else %}
                              <!-- ml-lg-auto: margin left set to auto for large screen thats shifts to this item to right -->
-                             <ul class="navbar-nav ml-md-auto pl-5">
-                                 <a class="nav-link active" href="mailto:hello@kleeppr.com">hello@kleeppr.com</a>
+
+
+                            <ul class="navbar-nav ml-md-auto pl-5">
+                                 {% if not request.user.is_authenticated and url_name == "search" %}
+                                    <a class="nav-link btn btn-sm btn-subscribe mx-2" style="color:#fff" href="{% url 'register' %}">Create Account</a>
+                                    <a class="nav-link btn btn-sm btn-subscribe mx-2" style="color:#fff" href="{% url 'login' %}">Sign In</a>
+                                 {% endif %}
+                                <a class="nav-link active" href="mailto:hello@kleeppr.com">hello@kleeppr.com</a>
                             </ul>
                             {% endif %}
 
                     </div>
                 </div>
             </nav>
+{% endwith %}
 
  {% endblock %}

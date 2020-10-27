@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.urls import path,include,re_path
 from django.contrib.auth.views import LoginView
 from .views import log_the_request
@@ -9,14 +10,14 @@ from django.contrib.auth import views as auth_views
 
 # indus is account management prefix
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.search, name='index'),
     path('indus/', include('django.contrib.auth.urls')),
     path('indus/password_reset/', log_the_request(auth_views.PasswordResetView.as_view()), name='password_reset'),
     path('indus/reset/<uidb64>/<token>/', log_the_request(auth_views.PasswordResetConfirmView.as_view()), name='password_reset_confirm'),
     path('register_from_landing',views.register_from_landing,name='register_from_landing'),
     path('indus/register',views.register_user,name='register'),
     path('indus/register/<follow>',log_the_request(views.register_user),name='register_follow'),
-
+    #path('indus/login',auth_views.LoginView.as_view(),{'msg':None},name="login_with_msg"),
     path('feed', views.user_feed, name='feed'),
     path('feed/<int:nwl_id>',views.user_feed,name='nwl_feed'),
     path('confirmsub',views.user_feed,{'filterConfirmation':True},name='confirmsub',),
@@ -33,7 +34,12 @@ urlpatterns = [
     path('recent', views.recent_feed,name='recent'),
     path('privacy', views.terms,{ 'show':'pp'} ,name='privacy'),
     path('cookie', views.terms,{ 'show':'ck'} ,name='cookie'),
-    path('terms', views.terms,{ 'show':'tc'} ,name='terms')
+    path('terms', views.terms,{ 'show':'tc'} ,name='terms'),
+    path('error',views.error,name='error'),
+    path('about', views.index,name="about"),
+    path('e', views.search,name='search'),
+    url(r'^activate_account/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+                views.ActivateAccountView.as_view(), name='activate_account'),
 
     #re_path(r'^favicon\.ico$', favicon_view),
 ]
