@@ -10,6 +10,7 @@ cffi==1.14.3
 chardet==3.0.4
 cryptography==3.1.1
 django-extensions==3.0.4
+django-mail-templated==2.6.5
 fabric==2.5.0
 idna==2.10
 invoke==1.4.1
