@@ -11,6 +11,7 @@ chardet==3.0.4
 cryptography==3.1.1
 django-extensions==3.0.4
 django-mail-templated==2.6.5
+django-welcome==0.3.0
 fabric==2.5.0
 idna==2.10
 invoke==1.4.1
@@ -24,5 +25,6 @@ requests==2.24.0
 six==1.12.0
 soupsieve==2.0.1
 sqlparse==0.3.0
+stripe==2.55.0
 tldextract==2.2.3
 urllib3==1.25.10
