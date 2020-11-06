@@ -29,9 +29,9 @@
                      {% elif not pending_confirm %}
                      {% with request.resolver_match.url_name as url_name %}
                         <nav class="nav tags flex-md-column nav-fill nav-pills">
-                            <a class="nav-link {% if url_name == 'recent' %} active{% endif %}" href="{% url 'recent' %}">Snapshot</a>
+                            <a class="nav-link {% if url_name == 'recent' %} active{% endif %}" href="{% url 'recent' %}">New & Noteworthy</a>
                             <a class="nav-link {% if url_name == 'feed' %} active{% endif %}"
-                                    href="{% url 'feed' %}">Timeline {{ filterConfirmation }}</a>
+                                    href="{% url 'feed' %}">Timeline</a>
                         </nav>
                     {% if url_name == 'recent' %}
                         <!--div class="alert alert-secondary" role="alert">
@@ -58,16 +58,20 @@
                               Hey, have you <a href="{% url 'explore' %}"> subscribed </a> to a newsletter?
                               If yes then hang tight, your newsletter issue must be in flight!
                           </div>
-                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
+                          <img class="embed-responsive-item w-50" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
                                      allowfullscreen></img>
 
 
-                        {% else%}
+                        {% elif url_name == 'confirmsub' %}
+                            <div class="alert alert-warning">
+                                You have no pending subscriptions. Btw have you <a href="{% url 'explore' %}"> subscribed </a> to a newsletter?
+                          </div>
+                        {% else %}
                           <div class="alert alert-warning">
                               Hey, have you <a href="{% url 'explore' %}"> subscribed </a> to a newsletter?
                               If yes then hang tight, your newsletter issue must be in flight!
                           </div>
-                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
+                          <img class="embed-responsive-item w-50" src="https://media.giphy.com/media/q62RmgTAJzjIk/giphy.gif"
                                      allowfullscreen></img>
 
                         {% endif %}
@@ -76,15 +80,18 @@
                             <div class="alert alert-warning">
                                   Hi there, we too are waiting for new issues!
                               </div>
-                               <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
+                               <img class="embed-responsive-item w-50" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
                                          allowfullscreen></img>
 
-
+                        {% elif url_name == 'confirmsub' %}
+                            <div class="alert alert-warning">
+                                You have no pending subscriptions.
+                          </div>
                         {% else%}
                           <div class="alert alert-warning">
                               Hey, we have been waiting for your newsletter issues!
                           </div>
-                          <img class="embed-responsive-item w-100" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
+                          <img class="embed-responsive-item w-50" src="https://media.giphy.com/media/xTkcEQACH24SMPxIQg/giphy.gif"
                                      allowfullscreen></img>
 
                         {% endif %}
@@ -107,7 +114,7 @@
                         <div class="card border-0">
                             <div class="card-body">
                                 <a href="{% url 'letter' message_id=feed_rec.message_id %}">
-                                    <h6 class="card-title"> {{ feed_rec.subject | safe }}</h6>
+                                    <h5 class="card-title"> {{ feed_rec.subject | safe }}</h5>
                                 </a>
                                 <h6 class="card-subtitle text-muted mt-1">{{ feed_rec.nwl_id.letter | title }} by {{ feed_rec.nwl_id.author }}</h6>
                                 <p class="card-text mt-2" style="font-size:15px">{{ feed_rec.intro |safe }}...</p>

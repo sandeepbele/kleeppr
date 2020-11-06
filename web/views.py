@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
 # Create your views here
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
 import django.contrib.auth.urls
@@ -38,6 +38,15 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 
 from web.tokens import account_activation_token
+
+import stripe
+import json
+
+from django.views.decorators.csrf import csrf_exempt
+
+#######################
+stripe.api_key = settings.STRIPE_API_SECRET
+######################3
 
 def log_the_request(view_func):
     def log_decorator(request,*args, **kwargs):
@@ -154,7 +163,7 @@ def register_user(request):
 
                             log("New user signed up:"+username, logging.INFO,request)
 
-                            return redirect(reverse('tour'))
+                            return redirect(reverse('checkout'))
                         else:
 
                             log("[****ATTN***]Critical:user creation failed due to insufficient emails:"+username,logging.ERROR,request)
@@ -309,9 +318,9 @@ def explore(request,tag="All"):
     tag = tag.strip()
     if tag != "All":
         print("tag:",tag)
-        letters = Newsletters.objects.filter(tags__tag=tag).order_by('id')
+        letters = Newsletters.objects.filter(tags__tag=tag).order_by('random_order')
     else:
-        letters = Newsletters.objects.order_by('id')
+        letters = Newsletters.objects.order_by('random_order')
 
     tags = letters.values_list('tags__tag',flat=True)
     unique_tags = []
@@ -324,7 +333,6 @@ def explore(request,tag="All"):
     paginator = Paginator(letters, per_page=24)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
 
     follow = None
     if 'follow' in request.session:
@@ -340,7 +348,7 @@ def bookmark(request):
     user = UserSettings.objects.filter(user_id=request.user.id)
     if user:
         user = user[0]
-    return render(request,'bookmarklet.html',{'appid':user.appid})
+    return render(request,'bookmarklet.html',{'appid':user.appid, 'payment_status':user.stripe_payment_status})
 
 
 @log_the_request
@@ -374,7 +382,7 @@ def search_letters(request):
         #https://docs.djangoproject.com/en/3.1/ref/contrib/postgres/search/#postgresql-fts-search-configuration
         letters = Newsletters.objects.annotate(
                     search = SearchVector('letter', 'desc','author','tags__tag'),
-                              ).filter(search=SearchQuery(term)).distinct()
+                              ).filter(search=SearchQuery(term)).distinct().order_by('random_order')
 
         letters = {letter for letter in letters if letter.is_complete() and letter.is_active and letter.is_verified}
         letters = list(letters)
@@ -408,3 +416,90 @@ def search(request):
 
 def error(request):
     return render(request,"500.html")
+
+@csrf_exempt
+def create_checkout_session(request):
+  session = stripe.checkout.Session.create(
+    client_reference_id = request.user.id,
+    customer_email =  request.user.username,
+    payment_method_types=['card'],
+    line_items=[{
+      # Replace `price_...` with the actual price ID for your subscription
+      # you created in step 2 of this guide.
+      'price': settings.STRIPE_PRICE_ID,
+      #'price':'price_',
+      'quantity': 1,
+    }],
+    mode='subscription',
+    subscription_data={'trial_period_days':180},
+    success_url= request.build_absolute_uri(reverse('tour')),
+    cancel_url= request.build_absolute_uri(reverse('error')),
+  )
+  return JsonResponse({'id':session.id})
+
+
+def checkout(request):
+    return render(request,'checkout.html',context={ 'stripe_key_publishable': settings.STRIPE_API_KEY_PUBLISHABLE })
+
+@csrf_exempt
+def webhook_received(request):
+    #webhook_secret = settings.STRIPE_WEBHOOK_SECRET
+    webhook_secret = settings.STRIPE_WEBHOOK_SECRET
+    #webhook_secret = None
+
+    request_data = json.loads(request.body)
+
+    if webhook_secret:
+        # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
+        signature = request.META['HTTP_STRIPE_SIGNATURE']
+        try:
+            event = stripe.Webhook.construct_event(
+                payload=request_data, sig_header=signature, secret=webhook_secret)
+            data = event['data']
+        except Exception as e:
+            return e
+        # Get the type of webhook event sent - used to check the status of PaymentIntents.
+        event_type = event['type']
+    else:
+        data = request_data['data']
+        event_type = request_data['type']
+
+    data_object = data['object']
+
+    user = None
+    if 'client_reference_id' in data_object:
+        user = User.objects.filter(pk=data_object['client_reference_id']).first()
+    elif 'customer_email' in data_object:
+        user = User.objects.filter(email=data_object['customer_email']).first()
+
+    status = "error"
+    if user:
+        user_settings = UserSettings.objects.filter(user_id=user.id).first()
+        user_settings.stripe_client_reference_id = data_object['client_reference_id']
+        user_settings.stripe_customer_id = data_object['customer']
+
+        if event_type == 'checkout.session.completed':
+            # Payment is successful and the subscription is created.
+            # You should provision the subscription.
+            user_settings.stripe_payment_status = "active"
+        elif event_type == 'invoice.paid':
+        # Continue to provision the subscription as payments continue to be made.
+        # Store the status in your database and check when a user accesses your service.
+        # This approach helps you avoid hitting rate limits.
+          print(data)
+        elif event_type == 'invoice.payment_failed':
+        # The payment failed or the customer does not have a valid payment method.
+        # The subscription becomes past_due. Notify your customer and send them to the
+        # customer portal to update their payment information.
+            print(data)
+            user_settings.payment_status = "inactive"
+
+        else:
+          print('Unhandled event type {}'.format(event.type))
+
+        user_settings.save()
+        status = "success"
+    else:
+        log("stripe webhook processing [event:%s]: user not found:%s " % (event_type,str(data)),logging.ERROR, request)
+
+    return JsonResponse({'status': status})

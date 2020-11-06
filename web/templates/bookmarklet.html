@@ -62,6 +62,12 @@
                 <li class="list-group-item">
                     <h6>Logged in since</h6>
                     <p class="card-text"> {{ request.user.last_login }}</p>
+                </li>
+                <li class="list-group-item">
+                    <h6>Kleeppr Subscription status:</h6>
+                    <p class="card-text {% if payment_status == 'active' %} text-success {% else %} text-danger {% endif %}"> {{ payment_status }}</p>
+                    <p class="card-text small"> # If you wish to cancel your subscription please email us at <strong>payments@kleeppr.com</strong> and we will take care of it. </p>
+                </li>
             </ul>
         </div>
     </div>

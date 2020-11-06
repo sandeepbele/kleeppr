@@ -31,7 +31,9 @@ for dir in ("db","logs","cache"):
 from dotenv import load_dotenv
 load_dotenv(os.path.join(get_runtime_dir(), '.env'))
 
-for critical_env_var in ('DJANGO_EMAIL_HOST_PASSWORD','IMAP_PASSWORD','DJANGO_ALLOWED_HOST','DJANGO_DEBUG','POSTGRES_PASSWORD'):
+for critical_env_var in ('DJANGO_EMAIL_HOST_PASSWORD','IMAP_PASSWORD','DJANGO_ALLOWED_HOST','DJANGO_DEBUG',
+                         'POSTGRES_PASSWORD','STRIPE_API_SECRET','STRIPE_WEBHOOK_SECRET','STRIPE_PRICE_ID',
+                         'STRIPE_API_KEY_PUBLISHABLE'):
     if not os.getenv(critical_env_var):
         raise ImproperlyConfigured(critical_env_var)
         pass
@@ -188,6 +190,11 @@ MAIL_TEMPLATED_DOMAIN= os.getenv("MAIL_TEMPLATED_DOMAIN")
 if not MAIL_TEMPLATED_DOMAIN:
     MAIL_TEMPLATED_DOMAIN = "https://kleeppr.com"
 
+
+STRIPE_API_SECRET = os.getenv('STRIPE_API_SECRET')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+STRIPE_PRICE_ID = os.getenv('STRIPE_PRICE_ID')
+STRIPE_API_KEY_PUBLISHABLE = os.getenv('STRIPE_API_KEY_PUBLISHABLE')
 
 
 LOGGING = {

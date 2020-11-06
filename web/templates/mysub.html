@@ -25,9 +25,8 @@
 
             <div class="col">
                 <div class="container">
-
-                {% if not page_obj.object_list %}
-                     <div class="alert alert-warning fade show mt-3" role="alert">
+                {% if page_obj.paginator.count <= 0 %}
+                     <div class="alert alert-warning mt-3" role="alert">
                        You have no active subscriptions. Please <a href="{% url 'explore' %}">explore</a> interesting newsletters and subscribe to start receiving them in your feed.
                      </div>
 

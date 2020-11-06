@@ -5,29 +5,29 @@
 
     <div class="container-fluid vh-100 flex-column border-1">
         <div class="h-25 d-flex align-items-end justify-content-center">
-            <div><p class="lead" style="font-size:3em"><strong>find <font style="color:#da2d2d"> newsletters </font> you love</strong></p></div>
+            <div><p class="lead" style="font-size:3.5em"><strong>find <font style="color:#da2d2d"> newsletters </font> you love</strong></p></div>
             <div class="w-sm-100"></div>
-             <div><p class="lead" style="font-size:1em"><strong>subscribe <font style="color:#da2d2d"> privately </font></strong></p></div>
+             <div><p class="lead" style="font-size:1.5em"><strong>subscribe <font style="color:#da2d2d"> privately </font></strong></p></div>
         </div>
-        <div class="d-flex h-10 align-items-start justify-content-center mt-3">
+        <div class="d-flex h-10 align-items-start justify-content-center mt-5">
                <form class="form-inline w-100 justify-content-center my-3" method="post" action="{% url 'search_explore' %}">
                    {% csrf_token %}
                    <input class="form-control w-50 mr-2" id="term" name="term" value="{{ term }}" type="search"
                           placeholder='"Politics" or "Morning Brew" or "Shane Parrish"' aria-label="Search">
-                   <button class="btn  my-2 my-sm-0 btn-subscribe" type="submit">Search</button>
+                   <button class="btn  my-2 my-sm-0 btn-subscribe" type="submit">Find Me Newsletters</button>
                </form>
         </div>
-        <div class="d-flex h-25 align-items-start justify-content-center mt-3">
-            <p class="small"><a href="{% url 'tag_explore' tag='News' %}"> News </a> |
-                <a href="{% url 'tag_explore' tag='Politics' %}"> Politics </a> |
+        <div class="search d-flex h-25 align-items-start justify-content-center mt-3">
+            <p class="small2"><a href="{% url 'tag_explore' tag='News' %}"> News </a> |
+                <a class="" href="{% url 'tag_explore' tag='Politics' %}"> Politics </a> |
                 <a href="{% url 'tag_explore' tag='Business' %}"> Business </a>|
                 <a href="{% url 'tag_explore' tag='Culture' %}"> Culture </a> |
                 <a href="{% url 'tag_explore' tag='Sports' %}"> Sports </a>
             </p>
         </div>
 
-        <div class="d-flex flex-grow-1 text-center justify-content-center mt-3">
-            <p class="text-muted small w-50"> Kleeppr lets you subscribe to email newsletters <u>anonymously</u>. Learn more <a href="{% url 'about' %}">about us </a>.</p>
+        <div class="search d-flex flex-grow-1 text-center justify-content-center mt-3">
+            <p class="text-muted  w-50"> Kleeppr lets you subscribe to email newsletters <u>anonymously</u>. Learn more <a href="{% url 'about' %}">about us </a>.</p>
         </div>
 
     </div>

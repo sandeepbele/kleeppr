@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 from utils import MailUtils
-
+import random
 
 class Tags(models.Model):
     tag = models.TextField(unique=True,default="")
@@ -40,6 +40,8 @@ class Newsletters(models.Model):
     updated_at = models.DateTimeField(auto_now=True,null=True)
 
     publisher = models.ForeignKey(Publisher,default=None,on_delete=models.CASCADE)
+
+    random_order = models.IntegerField(default=random.randint(1,99999999))
 
     def get_tags(self):
         tags = self.tags.all().values_list('tag',flat=True)
@@ -89,6 +91,9 @@ class UserSettings(models.Model):
     appid = models.TextField(null=True)
     feeder_ts = models.DateTimeField(null=True)
     email_verified = models.BooleanField(null=True, default=False)
+    stripe_payment_status = models.TextField(choices=[('active','active'),('inactive','inactive')],default="inactive")
+    stripe_client_reference_id = models.IntegerField(null=True)
+    stripe_customer_id = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

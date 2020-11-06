@@ -5,6 +5,14 @@ html {
 body {
   margin-bottom: 30px; /* Margin bottom by footer height */
 }
+
+body, html {
+    color: rgb(60, 66, 87);
+    font-weight: 400;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif;
+}
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -16,28 +24,39 @@ body {
 .card-body a {color: #303036;}
 .card-body a:hover {color: #303036;}
 
-.feed .card-body a {color: #0479d2;}
+#.feed .card-body a {color: #0479d2;}
+.feed .card-body a {color: #556CD6;}
 .feed .card-body  a:hover {color: #0479d2;}
 
-.pagination .page-item a { color: #303036; }
+#.pagination .page-item a { color: #303036; }
+.pagination .page-item a { color: #556CD6; }
 .pagination .page-item a:hover { color: #303036; }
+
+.search a { color: #556CD6; }
+.search a:hover { color: #303036; }
 
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
     #color: #fff;
     color: #002D62;
-    background-color: #6CB4EE;
+    #background-color: #6CB4EE;
+    background-color: #a5add1;
     opacity: 0.9
     }
 
 .nav-pills .nav-link {
-    color: #0479d2;
+    #color: #0479d2;
+    color: #556CD6;
     }
 
 .btn-subscribe {
     color: #fff;
-    background-color: #0479d2;
+    #background-color: #0479d2;
+    background-color: #556CD6;
 }
 
+.trial-text {
+    color:#556CD6;
+}
 
 .navbar-nav .nav-link {
     color:#555d65;
@@ -48,7 +67,10 @@ body {
 }
 
 .navbar-light {
-    background-color:#F5F9FC;
+    #background-color:#F5F9FC;
+    #background-color:#556CD6;
+    #background-color:#91a1ed;
+    background-color:white
 }
 
  .fade {

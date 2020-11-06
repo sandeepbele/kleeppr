@@ -43,7 +43,7 @@
                                         Email
                                     </a>
                                     <a class="nav-link {% if url_name == 'bookmark' %} active {% endif %}" href="/bookmark">Bookmarklet</a-->
-                                 <a class="nav-link {% if url_name == 'bookmark' %} active {% endif %}" href="/bookmark">Kleeppr ID</a>
+                                 <a class="nav-link {% if url_name == 'bookmark' %} active {% endif %}" href="{% url 'bookmark' %}">Kleeppr ID</a>
 
                                 {% endif %}
                                 <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>

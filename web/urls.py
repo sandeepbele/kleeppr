@@ -26,7 +26,7 @@ urlpatterns = [
     path('mysub',views.my_sub,name='mysub'),
     path('explore',views.explore,name='explore'),
     path('explore/<tag>',views.explore,name='tag_explore'),
-    path('bookmark',views.bookmark,name='bookmark'),
+    path('account',views.bookmark,name='bookmark'),
     path('follow/<int:next>',views.follow,name='follow'),
     path('search',views.search_letters,name="search_explore"),
     path('tour',views.tour,name='tour'),
@@ -40,6 +40,9 @@ urlpatterns = [
     path('e', views.search,name='search'),
     url(r'^activate_account/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
                 views.ActivateAccountView.as_view(), name='activate_account'),
+    path('create-checkout-session',views.create_checkout_session,name='create-checkout-session'),
+    path('checkout',views.checkout,name='checkout'),
+    path('webhook',views.webhook_received,name='webhook')
 
     #re_path(r'^favicon\.ico$', favicon_view),
 ]
