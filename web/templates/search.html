@@ -13,7 +13,7 @@
                <form class="form-inline w-100 justify-content-center my-3" method="post" action="{% url 'search_explore' %}">
                    {% csrf_token %}
                    <input class="form-control w-50 mr-2" id="term" name="term" value="{{ term }}" type="search"
-                          placeholder='"Politics" or "Morning Brew" or "Shane Parrish"' aria-label="Search">
+                          placeholder='Type something like "Politics" or "Morning Brew" or "Shane Parrish"' aria-label="Search">
                    <button class="btn  my-2 my-sm-0 btn-subscribe" type="submit">Find Me Newsletters</button>
                </form>
         </div>

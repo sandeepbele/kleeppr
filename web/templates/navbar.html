@@ -13,7 +13,7 @@
                         </a>
                     {% endif %}
 
-                    {% if request.user.is_authenticated and url_name != "search" %}
+                    {% if request.user.is_authenticated and url_name != "index" %}
 
                         <!-- note data-target pointing to collapse-div -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#klpMenu"
@@ -55,10 +55,12 @@
 
 
                             <ul class="navbar-nav ml-md-auto pl-5">
-                                 {% if not request.user.is_authenticated and url_name == "search" %}
+                                 {% if not request.user.is_authenticated and url_name == "index" %}
                                     <a class="nav-link btn btn-sm btn-subscribe mx-2" style="color:#fff" href="{% url 'register' %}">Create Account</a>
                                     <a class="nav-link btn btn-sm btn-subscribe mx-2" style="color:#fff" href="{% url 'login' %}">Sign In</a>
-                                 {% endif %}
+                                {% elif request.user.is_authenticated %}
+                                     <a class="nav-link btn btn-sm btn-subscribe mx-2" style="color:#fff" href="{% url 'feed' %}">Go To Feed</a>
+                                {% endif %}
                                 <a class="nav-link active" href="mailto:hello@kleeppr.com">hello@kleeppr.com</a>
                             </ul>
                             {% endif %}

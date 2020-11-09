@@ -35,6 +35,8 @@ body, html {
 .search a { color: #556CD6; }
 .search a:hover { color: #303036; }
 
+a {color: #556CD6;}
+
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
     #color: #fff;
     color: #002D62;
