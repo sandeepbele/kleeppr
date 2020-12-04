@@ -16,6 +16,7 @@
 
           gtag('config', 'UA-180902306-1');
         </script>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
         {% load static %}
         <!-- Bootstrap CSS -->
@@ -33,7 +34,11 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
         {% block custom_js_inhead %} {% endblock %}
-        <title>{ Kleeppr } Your mailbox for Email Newsletters!</title>
+        <title>{Kleeppr} Discover email newsletters and subscribe to them anonymously</title>
+        <meta name="description" content="Kleeppr helps you discover new and interesting newsletters to follow and lets
+        you subscribe to them anonymously.">
+        <meta name="robots" content="index,follow">
+
 
     </head>
 {% endblock %}

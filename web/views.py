@@ -163,7 +163,8 @@ def register_user(request):
 
                             log("New user signed up:"+username, logging.INFO,request)
 
-                            return redirect(reverse('checkout'))
+                            #return redirect(reverse('checkout'))
+                            return redirect(reverse('tour'))
                         else:
 
                             log("[****ATTN***]Critical:user creation failed due to insufficient emails:"+username,logging.ERROR,request)
@@ -454,7 +455,7 @@ def webhook_received(request):
         signature = request.META['HTTP_STRIPE_SIGNATURE']
         try:
             event = stripe.Webhook.construct_event(
-                payload=request_data, sig_header=signature, secret=webhook_secret)
+                payload=request.body, sig_header=signature, secret=webhook_secret)
             data = event['data']
         except Exception as e:
             return e

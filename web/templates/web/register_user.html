@@ -10,10 +10,10 @@
             <div class="card">
                 <div class="card-header">
                     <h4>Sign up for Kleeppr</h4>
-                    <h6 class="text-muted small">Subscribe to newsletters <strong>anonymously</strong></h6>
-                    <h6 class="trial-text">
+                    <h6 class="trial-text">Discover newsletters and subscribe to them <strong>anonymously</strong></h6>
+                    <!--h6 class="trial-text">
                           Try FREE for 6 Months, $5.99/month after free trial , cancel anytime!
-                    </h6>
+                    </h6-->
                 </div>
                 <div class="card-body">
 
@@ -22,7 +22,7 @@
                     {% endif %}
 
                     {% load form_helper %}
-                    <form action="{%  url 'register' %}" method="POST" name="register_user_form" class="needs-validation" novalidate>
+                    <form id="register_user_form" action="{%  url 'register' %}" method="POST" name="register_user_form" class="needs-validation" novalidate>
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="username">Email address </label>
@@ -59,10 +59,13 @@
 
                         <input id="next" name="next" type="hidden" value="{{ next }}">
 
-                        <div class="mt-4">
-                        <button type="submit" class="btn btn-subscribe" name="submit" value="Register">Start My Free Trial</button>
+                         <div class="g-recaptcha mt-4" data-sitekey="6Ley7_YZAAAAAJzMiHnQF2XykHiwTxwr-cJZhjDC"></div>
 
-                        </div>
+                        <div class="mt-4">
+                            <!--button type="submit" class="btn btn-subscribe" name="submit" value="Register">Start My Free Trial</button-->
+                            <button type="submit" class="btn btn-subscribe" name="submit" value="Register">Create My Account</button>
+                         </div>
+
                     </form>
 
                 </div>
@@ -83,5 +86,6 @@
 <script>
    formValidatorEventListener ();
 </script>
+
 
 {% endblock%}
