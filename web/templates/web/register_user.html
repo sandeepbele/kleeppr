@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4>Sign up for Kleeppr</h4>
-                    <h6 class="trial-text">Discover newsletters and subscribe to them <strong>anonymously</strong></h6>
+                    <h6 class="trial-text">Discover email newsletters and subscribe to them <strong>anonymously</strong></h6>
                     <!--h6 class="trial-text">
                           Try FREE for 6 Months, $5.99/month after free trial , cancel anytime!
                     </h6-->
@@ -59,12 +59,12 @@
 
                         <input id="next" name="next" type="hidden" value="{{ next }}">
 
-                         <div class="g-recaptcha mt-4" data-sitekey="6Ley7_YZAAAAAJzMiHnQF2XykHiwTxwr-cJZhjDC"></div>
+                         <div class="g-recaptcha" data-sitekey="6Lck9fYZAAAAAP_UBW3b2N4Xhg12iCm8sjDF3po3" data-callback="onSubmit" data-size="invisible"></div>
 
                         <div class="mt-4">
                             <!--button type="submit" class="btn btn-subscribe" name="submit" value="Register">Start My Free Trial</button-->
                             <button type="submit" class="btn btn-subscribe" name="submit" value="Register">Create My Account</button>
-                         </div>
+                        </div>
 
                     </form>
 
@@ -84,7 +84,11 @@
 
 {% block custom_js %}
 <script>
-   formValidatorEventListener ();
+    function onSubmit(token) {
+      //alert('thanks ' + document.getElementById('field').value);
+    }
+   formValidatorEventListenerWithCaptcha();
+
 </script>
 
 
