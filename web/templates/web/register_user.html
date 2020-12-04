@@ -63,7 +63,7 @@
 
                         <div class="mt-4">
                             <!--button type="submit" class="btn btn-subscribe" name="submit" value="Register">Start My Free Trial</button-->
-                            <button type="submit" class="btn btn-subscribe" name="submit" value="Register">Create My Account</button>
+                            <button type="submit" class="btn btn-subscribe" name="register" value="Register">Create My Account</button>
                         </div>
 
                     </form>
@@ -85,7 +85,7 @@
 {% block custom_js %}
 <script>
     function onSubmit(token) {
-      //alert('thanks ' + document.getElementById('field').value);
+      document.forms["register_user_form"].submit()
     }
    formValidatorEventListenerWithCaptcha();
 
