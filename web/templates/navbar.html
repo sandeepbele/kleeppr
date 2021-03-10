@@ -1,7 +1,7 @@
 
 {% block navbar %}
         {% with request.resolver_match.url_name as url_name %}
-            <nav class="navbar navbar-expand-md navbar-light" style="background-color2:#F5F9FC">
+            <nav class="navbar navbar-expand-md navbar-light mb-3" style="background-color2:#F5F9FC">
                 <div class="container-fluid mx-md-5">
                     {% if request.user.is_authenticated %}
                         <a class="navbar-brand h3 col-2 mr-0" href="{% url 'feed' %}">
