@@ -163,8 +163,8 @@ def register_user(request):
 
                             log("New user signed up:"+username, logging.INFO,request)
 
-                            return redirect(reverse('checkout'))
-                            #return redirect(reverse('tour'))
+                            #return redirect(reverse('checkout'))
+                            return redirect(reverse('tour'))
                         else:
 
                             log("[****ATTN***]Critical:user creation failed due to insufficient emails:"+username,logging.ERROR,request)
