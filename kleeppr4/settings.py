@@ -46,7 +46,7 @@ for critical_env_var in ('DJANGO_EMAIL_HOST_PASSWORD','IMAP_PASSWORD','DJANGO_AL
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() in ("1", "true", "yes")
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOST").split(",")
 
@@ -172,7 +172,7 @@ EMAIL_HOST_USER="sandeep@kleeppr.com"
 EMAIL_HOST_PASSWORD=os.getenv("DJANGO_EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL="Kleeppr Support <noreply@kleeppr.com>"
 
-NOTIFICATION_TO_EMAIL="sandeep.bele@gmail.com"
+NOTIFICATION_TO_EMAIL=os.getenv("NOTIFICATION_TO_EMAIL", "hello@kleeppr.com")
 
 WELCOME_FROM_EMAIL = 'Kleeppr Support <hello@kleeppr.com>'
 

@@ -117,7 +117,7 @@ EXAMPLE:
                                   auth_user=settings.EMAIL_HOST_USER,
                                   auth_password=settings.EMAIL_HOST_PASSWORD
                                   )
-                        print("sending verification email to:",auth_user.email)
+                        print("Sent verification email")
 
                         if not test:
                             user.email_verification_sent = True
@@ -126,7 +126,7 @@ EXAMPLE:
                     except Exception as e:
                         print(e)
                 else:
-                    print("[dry_run] sending verification email to:", auth_user.email)
+                    print("[dry_run] Verification email")
 
         elif welcome:
             users = UserSettings.objects.filter(welcome_email_sent=False).filter(email_verified=True)
@@ -153,7 +153,7 @@ EXAMPLE:
                                   auth_user=settings.EMAIL_HOST_USER,
                                   auth_password=settings.EMAIL_HOST_PASSWORD
                                   )
-                        print("sending welcome email to:", auth_user.email)
+                        print("Sent welcome email")
                         if not test:
                             user.welcome_email_sent = True
                             user.welcome_email_sent_at = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
@@ -162,7 +162,7 @@ EXAMPLE:
                     except Exception as e:
                         print(e)
                 else:
-                    print("[dry_run] sending welcome email to:", auth_user.email)
+                    print("[dry_run] Welcome email")
 
         else:
             print("invalid option")

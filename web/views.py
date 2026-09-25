@@ -68,16 +68,12 @@ def log(msg,level,request):
     if hasattr(request,'user'):
         if not request.user.is_anonymous:
             extra['user'] = request.user.id
-        elif request.method == 'POST':
-            for key in ('username','email'):
-                if key in request.POST:
-                    extra['user'] = request.POST[key]
-                    break
 
         if not 'user' in extra:
             extra['user'] = '-'
 
-    extra['path'] = request.get_full_path_info()
+    route = getattr(request, 'resolver_match', None)
+    extra['path'] = route.view_name if route else request.path
     extra['method'] = request.method
     extra['scheme'] = request.scheme
 
@@ -143,14 +139,12 @@ def register_user(request):
             if form.is_valid():
                 form.save()
                 user = authenticate(request, username=username, password=password)
-                print(user)
 
                 if user is not None:
                     with transaction.atomic():
 
                         appid = AppIdStore.objects.select_for_update(skip_locked=True).filter(assigned=False).first()
                         if appid:
-                            print("email got", appid.app_id, " assigned:", appid.assigned)
                             us = UserSettings(user_id=user, appid=appid.app_id)
                             us.save()
                             user.email = user.username
@@ -161,13 +155,13 @@ def register_user(request):
                             request.session['appid'] = appid.app_id
                             login(request,user)
 
-                            log("New user signed up:"+username, logging.INFO,request)
+                            log("New user signed up", logging.INFO,request)
 
                             #return redirect(reverse('checkout'))
                             return redirect(reverse('tour'))
                         else:
 
-                            log("[****ATTN***]Critical:user creation failed due to insufficient emails:"+username,logging.ERROR,request)
+                            log("User creation failed due to insufficient email addresses",logging.ERROR,request)
                             error = "Oops,something went wrong! This is unusual and we are very sorry. " \
                                     "We will fix the issue and get back to you on email you just provided." \
                                     "Thank you - Team Kleeppr"
@@ -180,7 +174,7 @@ def register_user(request):
         else:
             error = "Ooops..Email address is already taken. Try again or use password reset link to recover your account."
 
-        log("Error: user registration failed:" + username + ", error:" + str(error), logging.ERROR, request)
+        log("User registration failed", logging.ERROR, request)
 
     return render(request,'web/register_user.html', {'form':form, 'extra_context':{ 'error':error, 'form_errors':form.errors}})
 
@@ -193,7 +187,6 @@ class ActivateAccountView(View):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
 
-        print(token,account_activation_token.make_token(user))
         if user is not None and account_activation_token.check_token(user, token):
 
             user_settings = UserSettings.objects.filter(user_id=user.pk).first()

@@ -38,13 +38,12 @@ class Command(BaseCommand):
             for user in User.objects.filter(is_active=True,is_staff=False,is_superuser=False).all():
                 user_settings = UserSettings.objects.filter(user_id=user.id).first()
                 if not user_settings:
-                    logger.warn("Possible error situation: user settings not found for active user: %s", user.username)
+                    logger.warning("User settings not found for user_id:%s", user.id)
                     continue
 
                 app_id_record = AppIdStore.objects.filter(app_id=user_settings.appid).first()
                 if not app_id_record:
-                    logger.warn("Possible error situation: app_id record not found for active user: %s, appid:%s",
-                                user.username, user_settings.appid)
+                    logger.warning("Mailbox record not found for user_id:%s", user.id)
                     continue
 
                 if 'from_ts' in options:
@@ -73,7 +72,7 @@ class Command(BaseCommand):
                 try:
                     imapbox = Imapbox(settings.IMAP_HOST, imap_user,
                                       imap_secret)
-                    logger.info("[feeder]**** starting run for user:%s appid:%s",user.username,user_settings.appid)
+                    logger.info("[feeder] starting run for user_id:%s", user.id)
                     count = 0
                     for uid,message in imapbox.list_messages(last_fetched_ts, limit):
                         #print("uid:",uid)
@@ -84,25 +83,21 @@ class Command(BaseCommand):
                             count += 1
 
                     if count > 0:
-                        logger.info("[app_id:%s, from_ts:%s, limit: %d] Parsed and added %d records to Feed",
-                                    imap_user, last_fetched_ts, limit, count)
+                        logger.info("[from_ts:%s, limit: %d] Parsed and added %d records to Feed",
+                                    last_fetched_ts, limit, count)
                         user_settings.feeder_ts = datetime.now(tz=pytz.UTC)
                         user_settings.save()
 
                 except Exception as e:
-                    print(e)
-                    logger.error("Error in fetching or parsing messages for user: %s : %s" , imap_user, str(e))
+                    logger.error("Error fetching or parsing messages for user_id:%s: %s", user.id, str(e))
 
         except Exception as e:
-            print(e)
-            logger.error("Error in feeder", e)
+            logger.error("Error in feeder: %s", e)
             #sys.exit(0)
         finally:
             logger.info("Run finished... lock is released")
             if os.path.exists(lockfile): # cleanup
                 os.remove(lockfile)
-
-
 
 
 

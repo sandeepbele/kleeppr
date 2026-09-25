@@ -56,8 +56,7 @@ class Command(BaseCommand):
                             if not options['dry_run']:
                                 d = AppIdStore.objects.create(app_id=email, app_id_secret=unsalted_password, assigned=False)
                                 d.save()
-                            print("###success:", imap_username, "   unsalted_password:", unsalted_password,
-                                  "    salted_password:", salted_password)
+                            print("Created mailbox:", imap_username)
                         else:
                             print("###failed:",email+"@"+settings.APPID_MAIL_SERVER_DOMAIN,result)
 
@@ -66,5 +65,3 @@ class Command(BaseCommand):
             print("created %d app ids" % count)
         finally:
             remote_shell.close()
-        #for x in AppIdStore.objects.all():
-        #    print(x.app_id, x.app_id_secret, x.assigned)

@@ -6,3 +6,11 @@ cache
 __pycache__
 */__pycache__
 **/__pycache__
+.DS_Store
+.venv/
+venv/
+venv-*/
+*.py[cod]
+*.sqlite3
+*.db
+postgres/
